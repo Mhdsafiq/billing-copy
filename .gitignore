@@ -1,0 +1,47 @@
+node_modules
+package-lock.json
+.venv
+
+# Logs
+logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+lerna-debug.log*
+
+node_modules
+dist
+dist-ssr
+dist-electron
+*.local
+
+# Editor directories and files
+.vscode/*
+!.vscode/extensions.json
+.idea
+.DS_Store
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+
+
+*.db
+
+mobile_app_guide.md
+.env
+
+desktop_app_guide.md
+
+supabase_setup.sql
+supabase_validity_migration.sql
+supabase_v4_registration_fix.sql
+supabase_v3_saas_schemas.sql
+
+# Cache and temporary files
+.wwebjs_cache/
+scratch_image_conversion/
+scratch/

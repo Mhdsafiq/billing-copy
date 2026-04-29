@@ -1,0 +1,1740 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <title>iVA Owner Dashboard</title>
+  <meta name="description" content="Real-time business dashboard — sales, profits, inventory alerts and analytics for your store." />
+  <meta name="theme-color" content="#06060a" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="mobile-web-app-capable" content="yes" />
+  <link rel="manifest" href="manifest.json" />
+  <link rel="apple-touch-icon" href="https://cdn-icons-png.flaticon.com/512/1055/1055644.png" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet" />
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4/dist/chart.umd.min.js"></script>
+  <!-- Supabase JS Client (for direct cloud access from anywhere) -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+
+  <style>
+    /* ══════════════════════════════════════════════════════
+       DESIGN SYSTEM
+    ══════════════════════════════════════════════════════ */
+    :root {
+      --bg: #06060a;
+      --bg-card: #0d0d14;
+      --bg-card-2: #111119;
+      --border: #1a1a24;
+      --border-2: #252532;
+      --text-1: #f0f0f5;
+      --text-2: #b0b0c0;
+      --text-3: #707085;
+      --text-4: #45455a;
+      --accent: #6366f1;
+      --accent-glow: rgba(99,102,241,0.15);
+      --green: #22c55e;
+      --green-bg: rgba(34,197,94,0.1);
+      --red: #ef4444;
+      --red-bg: rgba(239,68,68,0.1);
+      --amber: #f59e0b;
+      --amber-bg: rgba(245,158,11,0.1);
+      --cyan: #06b6d4;
+      --cyan-bg: rgba(6,182,212,0.1);
+      --radius: 16px;
+      --radius-sm: 10px;
+      --font: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+      --safe-bottom: env(safe-area-inset-bottom, 0px);
+    }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    html, body {
+      font-family: var(--font);
+      background: var(--bg);
+      color: var(--text-1);
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+      overflow-x: hidden;
+    }
+
+    /* ── Scrollbar ── */
+    ::-webkit-scrollbar { width: 4px; }
+    ::-webkit-scrollbar-track { background: transparent; }
+    ::-webkit-scrollbar-thumb { background: var(--border-2); border-radius: 4px; }
+
+    /* ══════════════════════════════════════════════════════
+       LOGIN SCREEN
+    ══════════════════════════════════════════════════════ */
+    #login-screen {
+      position: fixed; inset: 0; z-index: 200;
+      display: flex; align-items: center; justify-content: center;
+      background: var(--bg);
+      padding: 24px;
+    }
+    #login-screen.hidden { display: none; }
+
+    .login-box {
+      width: 100%; max-width: 340px;
+      text-align: center;
+    }
+    .login-logo {
+      width: 56px; height: 56px;
+      border-radius: 16px;
+      background: linear-gradient(135deg, var(--accent), #8b5cf6);
+      display: inline-flex; align-items: center; justify-content: center;
+      margin-bottom: 20px;
+      box-shadow: 0 8px 32px rgba(99,102,241,0.3);
+    }
+    .login-logo svg { width: 28px; height: 28px; color: white; }
+    .login-title { font-size: 22px; font-weight: 800; letter-spacing: -0.03em; margin-bottom: 6px; }
+    .login-sub { font-size: 13px; color: var(--text-3); margin-bottom: 32px; }
+    .login-input {
+      width: 100%; height: 52px;
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 0 20px;
+      color: var(--text-1);
+      font-size: 18px; font-weight: 600;
+      text-align: center;
+      letter-spacing: 0.2em;
+      outline: none;
+      font-family: var(--font);
+      transition: border-color 0.3s;
+    }
+    .login-input:focus { border-color: var(--accent); }
+    .login-input::placeholder { color: var(--text-4); letter-spacing: 0.05em; font-size: 14px; font-weight: 400; }
+
+    .login-btn {
+      width: 100%; height: 52px; margin-top: 16px;
+      border: none; border-radius: 14px;
+      background: linear-gradient(135deg, var(--accent), #8b5cf6);
+      color: white; font-weight: 700; font-size: 14px;
+      cursor: pointer;
+      font-family: var(--font);
+      letter-spacing: 0.04em; text-transform: uppercase;
+      transition: opacity 0.2s, transform 0.1s;
+    }
+    .login-btn:active { transform: scale(0.98); opacity: 0.9; }
+    .login-error { color: var(--red); font-size: 12px; margin-top: 12px; display: none; font-weight: 600; }
+
+    /* ── Connection mode indicator on login ── */
+    .login-mode {
+      margin-top: 20px; padding: 10px 16px;
+      border-radius: 10px; font-size: 11px;
+      font-weight: 600; text-align: center;
+    }
+    .login-mode.cloud { background: var(--green-bg); color: var(--green); }
+    .login-mode.local { background: var(--cyan-bg); color: var(--cyan); }
+
+    /* ══════════════════════════════════════════════════════
+       APP CONTAINER
+    ══════════════════════════════════════════════════════ */
+    #app { display: none; padding-bottom: calc(80px + var(--safe-bottom)); }
+    #app.visible { display: block; }
+
+    /* ── Header ── */
+    .app-header {
+      position: sticky; top: 0; z-index: 100;
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 16px 20px;
+      background: rgba(6,6,10,0.85);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border-bottom: 1px solid var(--border);
+    }
+    .app-header .brand { font-size: 17px; font-weight: 800; letter-spacing: -0.02em; }
+    .app-header .brand span { color: var(--text-3); font-weight: 500; font-style: italic; }
+    .status-badge {
+      display: flex; align-items: center; gap: 6px;
+      background: var(--green-bg);
+      color: var(--green);
+      padding: 5px 12px;
+      border-radius: 20px;
+      font-size: 10px; font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+    .status-badge .dot { width: 6px; height: 6px; border-radius: 50%; background: var(--green); animation: pulse-dot 2s infinite; }
+    .status-badge.offline { background: var(--red-bg); color: var(--red); }
+    .status-badge.offline .dot { background: var(--red); animation: none; }
+    .status-badge.cloud { background: var(--cyan-bg); color: var(--cyan); }
+    .status-badge.cloud .dot { background: var(--cyan); }
+
+    @keyframes pulse-dot {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.3; }
+    }
+
+    /* ── Bottom Navigation ── */
+    .bottom-nav {
+      position: fixed; bottom: 0; left: 0; right: 0;
+      z-index: 100;
+      display: flex; justify-content: space-around; align-items: center;
+      height: calc(64px + var(--safe-bottom));
+      padding-bottom: var(--safe-bottom);
+      background: rgba(6,6,10,0.92);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border-top: 1px solid var(--border);
+    }
+    .nav-item {
+      display: flex; flex-direction: column; align-items: center; gap: 4px;
+      padding: 8px 16px;
+      color: var(--text-4);
+      font-size: 10px; font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      cursor: pointer;
+      transition: color 0.2s;
+      border: none; background: none;
+      font-family: var(--font);
+      -webkit-tap-highlight-color: transparent;
+    }
+    .nav-item.active { color: var(--accent); }
+    .nav-item svg { width: 22px; height: 22px; }
+
+    /* ── Tab Pages ── */
+    .tab-page { display: none; padding: 20px; }
+    .tab-page.visible { display: block; animation: fadeIn 0.3s ease; }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(8px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    /* ── Page Titles ── */
+    .page-title { font-size: 26px; font-weight: 800; letter-spacing: -0.03em; margin-bottom: 4px; }
+    .page-sub { font-size: 11px; color: var(--text-4); text-transform: uppercase; letter-spacing: 0.08em; font-weight: 700; margin-bottom: 20px; }
+
+    /* ══════════════════════════════════════════════════════
+       CARDS & METRICS
+    ══════════════════════════════════════════════════════ */
+    .card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 20px;
+      position: relative;
+      overflow: hidden;
+    }
+    .card-glow {
+      position: absolute; top: -40px; right: -40px;
+      width: 120px; height: 120px;
+      border-radius: 50%;
+      filter: blur(50px);
+      opacity: 0.15;
+      pointer-events: none;
+    }
+
+    .hero-card {
+      padding: 28px 24px;
+      border-radius: 20px;
+      background: linear-gradient(135deg, #0d0d1a 0%, #111125 100%);
+      border: 1px solid var(--border);
+      margin-bottom: 16px;
+    }
+    .hero-label { font-size: 10px; text-transform: uppercase; letter-spacing: 0.1em; font-weight: 700; color: var(--text-3); margin-bottom: 8px; }
+    .hero-value { font-size: 38px; font-weight: 900; letter-spacing: -0.03em; line-height: 1; }
+    .hero-divider { border: none; border-top: 1px solid var(--border); margin: 20px 0 16px; }
+    .hero-stats { display: flex; gap: 24px; }
+    .hero-stats .stat-label { font-size: 9px; text-transform: uppercase; letter-spacing: 0.08em; color: var(--text-4); font-weight: 700; margin-bottom: 4px; }
+    .hero-stats .stat-value { font-size: 15px; font-weight: 700; }
+
+    .metrics-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 20px; }
+    .metric-card {
+      padding: 16px;
+      border-radius: 14px;
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      position: relative;
+      overflow: hidden;
+    }
+    .metric-card .metric-icon {
+      width: 32px; height: 32px;
+      border-radius: 10px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 16px;
+      margin-bottom: 12px;
+    }
+    .metric-card .metric-value { font-size: 22px; font-weight: 800; letter-spacing: -0.02em; margin-bottom: 2px; }
+    .metric-card .metric-label { font-size: 10px; color: var(--text-3); text-transform: uppercase; letter-spacing: 0.06em; font-weight: 600; }
+
+    /* ── Chart Container ── */
+    .chart-card { margin-bottom: 20px; }
+    .chart-title { font-size: 11px; text-transform: uppercase; letter-spacing: 0.08em; font-weight: 700; color: var(--text-3); margin-bottom: 16px; }
+    .chart-wrap { height: 200px; width: 100%; }
+
+    /* ══════════════════════════════════════════════════════
+       ALERTS & LISTS
+    ══════════════════════════════════════════════════════ */
+    .section-title {
+      font-size: 11px; text-transform: uppercase;
+      letter-spacing: 0.08em; font-weight: 700;
+      color: var(--text-3); margin-bottom: 12px;
+      margin-top: 8px;
+    }
+
+    .alert-item {
+      display: flex; align-items: center; gap: 12px;
+      padding: 14px 16px;
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      margin-bottom: 8px;
+      transition: background 0.2s;
+    }
+    .alert-item:active { background: var(--bg-card-2); }
+    .alert-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+    .alert-content { flex: 1; min-width: 0; }
+    .alert-title { font-size: 12px; font-weight: 700; margin-bottom: 2px; }
+    .alert-desc { font-size: 11px; color: var(--text-3); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .alert-badge {
+      padding: 3px 8px; border-radius: 6px;
+      font-size: 10px; font-weight: 700;
+      flex-shrink: 0;
+    }
+
+    /* ── Product List Items ── */
+    .product-item {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 14px 16px;
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      margin-bottom: 8px;
+    }
+    .product-item .p-name { font-size: 13px; font-weight: 600; margin-bottom: 2px; }
+    .product-item .p-meta { font-size: 11px; color: var(--text-3); }
+    .product-item .p-qty {
+      font-size: 14px; font-weight: 800;
+      padding: 4px 12px;
+      border-radius: 8px;
+    }
+
+    /* ── Invoice Items ── */
+    .invoice-item {
+      padding: 14px 16px;
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      margin-bottom: 8px;
+    }
+    .invoice-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 6px; }
+    .invoice-id { font-size: 13px; font-weight: 700; }
+    .invoice-amount { font-size: 14px; font-weight: 800; color: var(--green); }
+    .invoice-meta { font-size: 11px; color: var(--text-3); }
+    .invoice-products { font-size: 11px; color: var(--text-4); margin-top: 6px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+
+    /* ── Top Sellers ── */
+    .top-item {
+      display: flex; align-items: center; gap: 12px;
+      padding: 12px 16px;
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      margin-bottom: 8px;
+    }
+    .top-rank {
+      width: 28px; height: 28px;
+      border-radius: 8px;
+      background: var(--accent-glow);
+      color: var(--accent);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 12px; font-weight: 800;
+      flex-shrink: 0;
+    }
+    .top-info { flex: 1; }
+    .top-name { font-size: 13px; font-weight: 600; }
+    .top-sold { font-size: 11px; color: var(--text-3); }
+    .top-revenue { font-size: 13px; font-weight: 700; color: var(--green); }
+
+    /* ── AI Chat Section ────────────────────── */
+    .chat-container { margin-top: 16px; display: flex; flex-direction: column; gap: 12px; }
+    .chat-header-row {
+      display: flex; align-items: center; gap: 10px;
+      padding: 12px 14px;
+      background: linear-gradient(135deg, rgba(99,102,241,0.15), rgba(139,92,246,0.1));
+      border: 1px solid rgba(99,102,241,0.25);
+      border-radius: 14px;
+    }
+    .chat-ai-avatar {
+      width: 36px; height: 36px; border-radius: 10px; flex-shrink: 0;
+      background: linear-gradient(135deg, #6366f1, #8b5cf6);
+      display: flex; align-items: center; justify-content: center; font-size: 18px;
+      box-shadow: 0 4px 12px rgba(99,102,241,0.35);
+    }
+    .chat-ai-info { flex: 1; }
+    .chat-ai-name { font-size: 13px; font-weight: 700; color: var(--text-1); }
+    .chat-ai-status { font-size: 11px; color: #22c55e; display: flex; align-items: center; gap: 4px; margin-top: 2px; }
+    .chat-ai-dot { width: 5px; height: 5px; background: #22c55e; border-radius: 50%; animation: aiPulse 2s ease infinite; }
+    @keyframes aiPulse { 0%,100% { opacity:1; } 50% { opacity:0.3; } }
+    .chat-gemini-badge {
+      font-size: 10px; padding: 3px 8px; border-radius: 20px;
+      background: rgba(99,102,241,0.2); color: #a5b4fc;
+      border: 1px solid rgba(99,102,241,0.3); font-weight: 600;
+    }
+    .chat-messages {
+      max-height: 340px; overflow-y: auto;
+      display: flex; flex-direction: column; gap: 10px;
+      padding: 4px 2px;
+      scrollbar-width: thin; scrollbar-color: rgba(99,102,241,0.3) transparent;
+    }
+    .chat-msg-row { display: flex; gap: 8px; align-items: flex-end; }
+    .chat-msg-row.user { flex-direction: row-reverse; }
+    .chat-msg-icon {
+      width: 26px; height: 26px; border-radius: 8px; flex-shrink: 0;
+      display: flex; align-items: center; justify-content: center; font-size: 12px;
+    }
+    .chat-msg-icon.bot { background: linear-gradient(135deg, #6366f1, #8b5cf6); }
+    .chat-msg-icon.user { background: linear-gradient(135deg, #0ea5e9, #38bdf8); }
+    .chat-bubble {
+      padding: 10px 14px;
+      border-radius: 14px;
+      font-size: 13px; line-height: 1.6;
+      max-width: 82%;
+      white-space: pre-wrap; word-break: break-word;
+    }
+    .chat-bubble.bot {
+      background: var(--bg-card-2);
+      border: 1px solid rgba(99,102,241,0.2);
+      color: var(--text-1);
+      border-bottom-left-radius: 4px;
+    }
+    .chat-bubble.user {
+      background: linear-gradient(135deg, #6366f1, #8b5cf6);
+      color: white;
+      border-bottom-right-radius: 4px;
+    }
+    /* Typing animation */
+    .chat-typing { display: flex; align-items: center; gap: 5px; padding: 10px 14px; }
+    .chat-typing-dot {
+      width: 7px; height: 7px; background: #6366f1; border-radius: 50%;
+      animation: typingBounce 1.4s ease infinite both;
+    }
+    .chat-typing-dot:nth-child(2) { animation-delay: 0.16s; }
+    .chat-typing-dot:nth-child(3) { animation-delay: 0.32s; }
+    @keyframes typingBounce { 0%,80%,100% { transform:scale(0); } 40% { transform:scale(1); } }
+    /* Quick prompts */
+    .chat-quick-prompts { display: flex; gap: 6px; flex-wrap: nowrap; overflow-x: auto; scrollbar-width: none; padding: 2px 0; }
+    .chat-quick-prompts::-webkit-scrollbar { display: none; }
+    .chat-chip {
+      white-space: nowrap; font-size: 11.5px;
+      padding: 5px 12px; border-radius: 20px; flex-shrink: 0;
+      background: rgba(99,102,241,0.1);
+      border: 1px solid rgba(99,102,241,0.25);
+      color: #a5b4fc; cursor: pointer;
+    }
+    .chat-chip:active { background: rgba(99,102,241,0.3); }
+    .chat-input-row { display: flex; gap: 8px; }
+    .chat-input {
+      flex: 1; height: 46px;
+      background: var(--bg-card);
+      border: 1px solid rgba(99,102,241,0.25);
+      border-radius: 12px;
+      padding: 0 16px;
+      color: var(--text-1);
+      font-size: 13px;
+      outline: none;
+      font-family: var(--font);
+    }
+    .chat-input:focus { border-color: var(--accent); box-shadow: 0 0 0 3px rgba(99,102,241,0.1); }
+    .chat-send {
+      width: 46px; height: 46px;
+      border-radius: 12px; border: none;
+      background: linear-gradient(135deg, #6366f1, #8b5cf6);
+      color: white; cursor: pointer;
+      display: flex; align-items: center; justify-content: center;
+      flex-shrink: 0;
+      box-shadow: 0 4px 12px rgba(99,102,241,0.3);
+      transition: transform 0.15s;
+    }
+    .chat-send:active { transform: scale(0.94); }
+    .chat-send:disabled { opacity: 0.4; cursor: not-allowed; }
+
+    /* ── Offline Banner ── */
+    .offline-banner {
+      display: none;
+      background: var(--amber-bg);
+      color: var(--amber);
+      padding: 10px 20px;
+      font-size: 12px; font-weight: 600;
+      text-align: center;
+    }
+    .offline-banner.show { display: block; }
+
+    /* ── Pull-to-refresh indicator ── */
+    .refresh-indicator {
+      text-align: center;
+      padding: 12px;
+      font-size: 11px;
+      color: var(--text-4);
+      font-weight: 600;
+      display: none;
+    }
+    .refresh-indicator.show { display: block; }
+
+    /* ── Loading skeleton ── */
+    .skeleton {
+      background: linear-gradient(90deg, var(--bg-card) 25%, var(--bg-card-2) 50%, var(--bg-card) 75%);
+      background-size: 200% 100%;
+      animation: shimmer 1.5s infinite;
+      border-radius: 8px;
+    }
+    @keyframes shimmer {
+      0% { background-position: 200% 0; }
+      100% { background-position: -200% 0; }
+    }
+
+    /* ── Empty State ── */
+    .empty-state { text-align: center; padding: 40px 20px; color: var(--text-4); }
+    .empty-state .emoji { font-size: 40px; margin-bottom: 12px; }
+    .empty-state .msg { font-size: 13px; font-weight: 500; }
+
+    /* ── Profit color helpers ── */
+    .profit-positive { color: var(--green); }
+    .profit-negative { color: var(--red); }
+
+    /* ── Notification Items ── */
+    .notif-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px; }
+    .notif-header .section-title { margin: 0; }
+    .notif-mark-all {
+      background: none; border: 1px solid var(--border-2); color: var(--text-3);
+      font-size: 10px; font-weight: 600; padding: 4px 10px; border-radius: 6px;
+      cursor: pointer; font-family: var(--font);
+    }
+    .notif-mark-all:active { background: var(--bg-card-2); }
+    .notif-item {
+      display: flex; align-items: flex-start; gap: 12px;
+      padding: 14px 16px;
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      margin-bottom: 8px;
+      position: relative;
+      transition: opacity 0.3s;
+    }
+    .notif-item.unread { border-left: 3px solid var(--accent); }
+    .notif-item .notif-icon {
+      width: 36px; height: 36px; border-radius: 10px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 18px; flex-shrink: 0;
+    }
+    .notif-item .notif-body { flex: 1; min-width: 0; }
+    .notif-item .notif-title { font-size: 12px; font-weight: 700; margin-bottom: 2px; }
+    .notif-item .notif-msg { font-size: 11px; color: var(--text-3); line-height: 1.4; }
+    .notif-item .notif-time { font-size: 9px; color: var(--text-4); margin-top: 4px; font-weight: 500; }
+    .notif-item .notif-dismiss {
+      background: none; border: none; color: var(--text-4); cursor: pointer;
+      font-size: 16px; padding: 0 4px; line-height: 1;
+    }
+    .notif-item .notif-dismiss:hover { color: var(--red); }
+    .notif-badge-count {
+      position: absolute; top: -4px; right: -4px;
+      background: var(--red); color: white;
+      font-size: 9px; font-weight: 800;
+      min-width: 16px; height: 16px;
+      border-radius: 8px;
+      display: flex; align-items: center; justify-content: center;
+      padding: 0 4px;
+      border: 2px solid var(--bg);
+    }
+    .header-bell {
+      position: relative; cursor: pointer;
+      background: none; border: none; color: var(--text-2);
+      padding: 4px;
+    }
+    .header-bell:active { opacity: 0.7; }
+  </style>
+</head>
+<body>
+
+<!-- ═══════════════════════════════════════════════════
+     LOGIN SCREEN
+═══════════════════════════════════════════════════ -->
+<div id="login-screen">
+  <div class="login-box">
+    <div class="login-logo">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10"/>
+      </svg>
+    </div>
+    <h1 class="login-title">iVA Owner Dashboard</h1>
+    <p class="login-sub">Enter your credentials to link your terminal</p>
+    
+    <div style="text-align: left; margin-bottom: 24px;">
+      <label style="font-size: 11px; text-transform: uppercase; color: var(--text-4); font-weight: 800; display: block; margin-bottom: 8px; margin-left: 4px;">Registered Owner Email</label>
+      <input id="shop-id-input" type="email" class="login-input" placeholder="owner@example.com" style="letter-spacing: normal; font-size: 16px; margin-bottom: 16px;" />
+      
+      <label style="font-size: 11px; text-transform: uppercase; color: var(--text-4); font-weight: 800; display: block; margin-bottom: 8px; margin-left: 4px;">Master Access Key</label>
+      <input id="master-key-input" type="password" class="login-input" placeholder="Access Key" />
+    </div>
+
+    <button id="login-btn" class="login-btn" onclick="attemptLogin()" style="margin-bottom: 12px;">Link Dashboard</button>
+    
+    <p style="font-size: 12px; color: var(--text-4); margin: 16px 0;">— OR —</p>
+    
+    <button id="pairing-btn" onclick="showPairingScreen()" style="width: 100%; padding: 14px; background: transparent; border: 1px dashed var(--border-2); border-radius: 14px; color: var(--text-2); font-weight: 700; cursor: pointer;">
+      📱 Generate Pairing Code
+    </button>
+
+    <div id="login-error" class="login-error">❌ Invalid key. Please try again.</div>
+    <div id="login-mode" class="login-mode" style="display:none;"></div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════
+     PAIRING SCREEN
+═══════════════════════════════════════════════════ -->
+<div id="pairing-screen" class="hidden">
+  <div class="login-box">
+    <div style="font-size: 48px; margin-bottom: 24px;">📟</div>
+    <h1 class="login-title">New Device Pairing</h1>
+    <p class="login-sub">Enter this code on your Desktop Terminal under "Pair Mobile Device"</p>
+    
+    <div id="pair-code-display" style="font-size: 42px; font-weight: 900; letter-spacing: 0.2em; color: var(--accent); margin: 40px 0; background: var(--bg-card); padding: 24px; border-radius: 20px; border: 1px solid var(--border);">
+      ------
+    </div>
+
+    <div id="pair-status" style="font-size: 13px; color: var(--text-3); margin-bottom: 32px;">
+      Waiting for desktop validation...
+    </div>
+
+    <button onclick="hidePairingScreen()" style="color: var(--text-4); background: transparent; border: none; font-weight: 700;">Cancel Pairing</button>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════
+     OFFLINE BANNER
+═══════════════════════════════════════════════════ -->
+<div id="offline-banner" class="offline-banner">
+  ⚡ You're offline — showing cached data
+</div>
+
+<!-- ═══════════════════════════════════════════════════
+     MAIN APP
+═══════════════════════════════════════════════════ -->
+<div id="app">
+  <!-- Header -->
+  <header class="app-header">
+    <div class="brand">iVA <span>CLOUD</span></div>
+    <div style="display:flex;align-items:center;gap:12px;">
+      <button class="header-bell" onclick="loadAllData()" title="Refresh">
+        <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21.5 2v6h-6M21.34 15.57a10 10 0 1 1-.92-10.26l5.58 5.58"/></svg>
+      </button>
+      <button class="header-bell" onclick="switchTab('alerts')" title="Notifications">
+        <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+        <span id="notif-badge" class="notif-badge-count" style="display:none;">0</span>
+      </button>
+      <div id="status-badge" class="status-badge">
+        <span class="dot"></span> Live
+      </div>
+    </div>
+  </header>
+
+  <!-- Refresh Indicator -->
+  <div id="refresh-indicator" class="refresh-indicator">↻ Refreshing data...</div>
+
+  <!-- ═══════ TAB: OVERVIEW ═══════ -->
+  <div id="tab-overview" class="tab-page visible">
+    <h1 class="page-title">Dashboard</h1>
+    <p class="page-sub" id="time-label">Loading...</p>
+
+    <!-- Hero Card: Today's Profit -->
+    <div class="hero-card">
+      <div class="hero-label">Today's Estimated Profit</div>
+      <div id="hero-profit" class="hero-value profit-positive">₹0</div>
+      <hr class="hero-divider" />
+      <div class="hero-stats">
+        <div>
+          <div class="stat-label">Revenue</div>
+          <div id="hero-revenue" class="stat-value">₹0</div>
+        </div>
+        <div>
+          <div class="stat-label">Cost</div>
+          <div id="hero-cost" class="stat-value">₹0</div>
+        </div>
+        <div>
+          <div class="stat-label">Bills</div>
+          <div id="hero-bills" class="stat-value">0</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Metrics -->
+    <div class="metrics-grid">
+      <div class="metric-card" onclick="switchTab('overview')" style="cursor:pointer;">
+        <div class="metric-icon" style="background:var(--green-bg);">📦</div>
+        <div id="m-products" class="metric-value">0</div>
+        <div class="metric-label">Products</div>
+      </div>
+      <div class="metric-card" onclick="switchTab('overview')" style="cursor:pointer;">
+        <div class="metric-icon" style="background:var(--cyan-bg);">📂</div>
+        <div id="m-categories" class="metric-value">0</div>
+        <div class="metric-label">Categories</div>
+      </div>
+      <div class="metric-card" onclick="switchTab('alerts')" style="cursor:pointer;">
+        <div class="metric-icon" style="background:var(--amber-bg);">⚠️</div>
+        <div id="m-low-stock" class="metric-value">0</div>
+        <div class="metric-label">Low Stock (≤10)</div>
+      </div>
+      <div class="metric-card" onclick="switchTab('alerts')" style="cursor:pointer;">
+        <div class="metric-icon" style="background:var(--red-bg);">🚫</div>
+        <div id="m-out-stock" class="metric-value">0</div>
+        <div class="metric-label">Out of Stock</div>
+      </div>
+      <div class="metric-card" onclick="switchTab('alerts')" style="cursor:pointer;">
+        <div class="metric-icon" style="background:var(--amber-bg);">⏰</div>
+        <div id="m-near-expiry" class="metric-value">0</div>
+        <div class="metric-label">Expiring Soon</div>
+      </div>
+      <div class="metric-card" onclick="switchTab('alerts')" style="cursor:pointer;">
+        <div class="metric-icon" style="background:var(--red-bg);">💀</div>
+        <div id="m-expired" class="metric-value">0</div>
+        <div class="metric-label">Expired</div>
+      </div>
+    </div>
+
+    <!-- Profit Summary (Now with OVERALL) -->
+    <div class="card" style="margin-bottom:20px;">
+      <div class="chart-title">Profit Summary</div>
+      <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px; text-align:center;">
+        <div>
+          <div style="font-size:9px; color:var(--text-4); text-transform:uppercase; letter-spacing:0.06em; font-weight:700; margin-bottom:6px;">Today</div>
+          <div id="profit-today" style="font-size:18px; font-weight:800;" class="profit-positive">₹0</div>
+        </div>
+        <div>
+          <div style="font-size:9px; color:var(--text-4); text-transform:uppercase; letter-spacing:0.06em; font-weight:700; margin-bottom:6px;">This Week</div>
+          <div id="profit-week" style="font-size:18px; font-weight:800;" class="profit-positive">₹0</div>
+        </div>
+        <div>
+          <div style="font-size:9px; color:var(--text-4); text-transform:uppercase; letter-spacing:0.06em; font-weight:700; margin-bottom:6px;">This Month</div>
+          <div id="profit-month" style="font-size:18px; font-weight:800;" class="profit-positive">₹0</div>
+        </div>
+        <div>
+          <div style="font-size:9px; color:var(--text-4); text-transform:uppercase; letter-spacing:0.06em; font-weight:700; margin-bottom:6px;">Overall</div>
+          <div id="profit-overall" style="font-size:18px; font-weight:800;" class="profit-positive">₹0</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Daily Sales Chart -->
+    <div class="card chart-card">
+      <div class="chart-title">Revenue · Last 7 Days</div>
+      <div class="chart-wrap"><canvas id="chart-daily"></canvas></div>
+    </div>
+
+    <!-- Monthly Sales Chart -->
+    <div class="card chart-card">
+      <div class="chart-title">Monthly Revenue Trend</div>
+      <div class="chart-wrap"><canvas id="chart-monthly"></canvas></div>
+    </div>
+
+    <!-- Top Selling Products -->
+    <div class="section-title">🏆 Top Selling Products</div>
+    <div id="top-sellers"></div>
+  </div>
+
+  <!-- ═══════ TAB: ALERTS ═══════ -->
+  <div id="tab-alerts" class="tab-page">
+    <h1 class="page-title">Alerts</h1>
+    <p class="page-sub">Stock & Expiry Warnings</p>
+
+    <!-- 🔔 Recent Notifications -->
+    <div id="notif-section" style="margin-bottom:20px;">
+      <div class="notif-header">
+        <div class="section-title">🔔 Recent Notifications</div>
+        <button class="notif-mark-all" onclick="markAllRead()">Mark all read</button>
+      </div>
+      <div id="notif-list"></div>
+    </div>
+
+    <div class="metrics-grid">
+      <div class="metric-card">
+        <div class="metric-icon" style="background:var(--red-bg);">💀</div>
+        <div id="a-expired" class="metric-value" style="color:var(--red);">0</div>
+        <div class="metric-label">Expired</div>
+      </div>
+      <div class="metric-card">
+        <div class="metric-icon" style="background:var(--amber-bg);">⏳</div>
+        <div id="a-near-expiry" class="metric-value" style="color:var(--amber);">0</div>
+        <div class="metric-label">Near Expiry</div>
+      </div>
+    </div>
+
+    <div class="section-title">Expired Products</div>
+    <div id="expired-list"></div>
+
+    <div class="section-title" style="margin-top:20px;">⏰ Expiring Soon</div>
+    <div id="near-expiry-list"></div>
+
+    <div class="section-title" style="margin-top:20px;">📉 Low Stock Items (≤10 units)</div>
+    <div id="low-stock-list"></div>
+
+    <div class="section-title" style="margin-top:20px;">Out of Stock</div>
+    <div id="out-stock-list"></div>
+
+    <div class="section-title" style="margin-top:20px;">Dead Stock (No sales in 30 days)</div>
+    <div id="dead-stock-list"></div>
+  </div>
+
+  <!-- ═══════ TAB: INVOICES ═══════ -->
+  <div id="tab-invoices" class="tab-page">
+    <h1 class="page-title">Invoices</h1>
+    <p class="page-sub">Recent Billing History</p>
+    <div id="invoice-list"></div>
+  </div>
+
+  <!-- ═══════ TAB: AI INSIGHTS ═══════ -->
+  <div id="tab-ai" class="tab-page">
+    <h1 class="page-title">AI Insights</h1>
+    <p class="page-sub">Ask About Your Business</p>
+
+    <!-- Quick Analytics -->
+    <div class="card" style="margin-bottom:20px;">
+      <div class="chart-title">Payment Mode Breakdown</div>
+      <div class="chart-wrap" style="height:180px;"><canvas id="chart-payments"></canvas></div>
+    </div>
+
+    <div class="card" style="margin-bottom:20px;">
+      <div class="chart-title">Peak Hours (Last 30 Days)</div>
+      <div class="chart-wrap" style="height:180px;"><canvas id="chart-peak"></canvas></div>
+    </div>
+
+    <!-- AI Chat -->
+    <div class="section-title">🤖 AI Business Assistant</div>
+    <div class="chat-container">
+
+      <!-- AI Header -->
+      <div class="chat-header-row">
+        <div class="chat-ai-avatar">🤖</div>
+        <div class="chat-ai-info">
+          <div class="chat-ai-name">Business Intelligence AI</div>
+          <div class="chat-ai-status">
+            <div class="chat-ai-dot"></div>
+            Live data from your shop database
+          </div>
+        </div>
+        <div class="chat-gemini-badge">Gemini</div>
+      </div>
+
+      <!-- Quick Prompt Chips -->
+      <div class="chat-quick-prompts" id="chat-chips">
+        <button class="chat-chip" onclick="setAndSend('Today sales?')">📊 Today Sales</button>
+        <button class="chat-chip" onclick="setAndSend('Overall profit?')">💰 Profit</button>
+        <button class="chat-chip" onclick="setAndSend('Low stock items?')">📦 Low Stock</button>
+        <button class="chat-chip" onclick="setAndSend('Expired products?')">⚠️ Expiry</button>
+        <button class="chat-chip" onclick="setAndSend('Top selling products?')">🏆 Top Products</button>
+        <button class="chat-chip" onclick="setAndSend('Best customer?')">👤 Customers</button>
+      </div>
+
+      <!-- Messages -->
+      <div id="chat-messages" class="chat-messages">
+        <div class="chat-msg-row bot">
+          <div class="chat-msg-icon bot">🤖</div>
+          <div class="chat-bubble bot">Hi! I'm your AI powered by Google Gemini ✨\nAsk me anything about your sales, profit, stock alerts, expiry status, or customers!</div>
+        </div>
+      </div>
+
+      <!-- Input -->
+      <div class="chat-input-row">
+        <input id="chat-input" class="chat-input" placeholder="Ask in Tamil or English..." />
+        <button class="chat-send" id="chat-send-btn" onclick="askAI()">
+          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════ BOTTOM NAV ═══════ -->
+  <nav class="bottom-nav">
+    <button class="nav-item active" data-tab="overview" onclick="switchTab('overview')">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
+      <span>Overview</span>
+    </button>
+    <button class="nav-item" data-tab="alerts" onclick="switchTab('alerts')">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+      <span>Alerts</span>
+    </button>
+    <button class="nav-item" data-tab="invoices" onclick="switchTab('invoices')">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
+      <span>Invoices</span>
+    </button>
+    <button class="nav-item" data-tab="ai" onclick="switchTab('ai')">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2a4 4 0 0 0-4 4c0 2 2 3 2 5h4c0-2 2-3 2-5a4 4 0 0 0-4-4z"/><line x1="10" y1="22" x2="14" y2="22"/><line x1="10" y1="19" x2="14" y2="19"/><line x1="10" y1="16" x2="14" y2="16"/></svg>
+      <span>Insights</span>
+    </button>
+  </nav>
+</div>
+
+<script>
+/* ══════════════════════════════════════════════════════
+   STATE & CONFIGURATION
+══════════════════════════════════════════════════════ */
+
+// Server-injected values (replaced when served from local API)
+const INJECTED_SUPABASE_URL = "__SUPABASE_URL__";
+const INJECTED_SUPABASE_KEY = "__SUPABASE_KEY__";
+const INJECTED_SHOP_ID      = "__SHOP_ID__";
+const INJECTED_MASTER_KEY   = "__MASTER_KEY__";
+const INJECTED_LOCAL_API    = "__LOCAL_API__";
+
+// Data source mode: 'local' (same WiFi) or 'cloud' (Supabase direct)
+let dataMode = 'local';
+let localAPI = '';
+let supabaseClient = null;
+let shopId = '';
+let isOnline = navigator.onLine;
+let charts = {};
+let statsData = {};
+let refreshInterval = null;
+
+/* ══════════════════════════════════════════════════════
+   SMART INIT — Detect local vs cloud mode
+══════════════════════════════════════════════════════ */
+function initDataSource() {
+  // 1. Check if page was served with injected values (local WiFi access)
+  const hasInjected = INJECTED_SUPABASE_URL && !INJECTED_SUPABASE_URL.includes("__SUPABASE_URL__") && INJECTED_SUPABASE_URL.startsWith("http");
+
+  if (hasInjected) {
+    // Save Supabase config to localStorage for future remote access
+    localStorage.setItem("iva_supabase_url", INJECTED_SUPABASE_URL);
+    localStorage.setItem("iva_supabase_key", INJECTED_SUPABASE_KEY);
+    localStorage.setItem("iva_shop_id", INJECTED_SHOP_ID);
+    if (INJECTED_LOCAL_API && !INJECTED_LOCAL_API.includes("__LOCAL_API__")) {
+      localStorage.setItem("iva_local_api", INJECTED_LOCAL_API);
+    }
+  }
+
+  // 2. Try to determine data source
+  const savedUrl = localStorage.getItem("iva_supabase_url");
+  const savedKey = localStorage.getItem("iva_supabase_key");
+  shopId = localStorage.getItem("iva_shop_id") || "";
+
+  // If we have a local API origin (page served from local server)
+  const isServedLocally = window.location.port === "4567" || (INJECTED_LOCAL_API && !INJECTED_LOCAL_API.includes("__LOCAL_API__"));
+
+  if (isServedLocally) {
+    localAPI = window.location.origin;
+    dataMode = 'local';
+    console.log("[Init] Mode: LOCAL — reading from API server at", localAPI);
+  }
+
+  // Also init Supabase client for cloud fallback / remote access
+  if (savedUrl && savedKey && savedUrl.startsWith("http")) {
+    try {
+      supabaseClient = supabase.createClient(savedUrl, savedKey);
+      console.log("[Init] Supabase client ready for cloud access");
+      // If NOT served locally, use cloud mode
+      if (!isServedLocally) {
+        dataMode = 'cloud';
+        console.log("[Init] Mode: CLOUD — reading from Supabase directly");
+      }
+    } catch (e) {
+      console.warn("[Init] Supabase init failed:", e.message);
+    }
+  }
+
+  // Update login screen mode indicator
+  const modeEl = document.getElementById("login-mode");
+  if (dataMode === 'cloud') {
+    modeEl.className = "login-mode cloud";
+    modeEl.textContent = "☁️ Cloud Mode — accessing data remotely via Supabase";
+    modeEl.style.display = "block";
+  } else if (isServedLocally) {
+    modeEl.className = "login-mode local";
+    modeEl.textContent = "📡 Local Mode — connected to shop server";
+    modeEl.style.display = "block";
+  }
+}
+
+initDataSource();
+
+/* ══════════════════════════════════════════════════════
+   SERVICE WORKER REGISTRATION
+══════════════════════════════════════════════════════ */
+if ("serviceWorker" in navigator) {
+  navigator.serviceWorker.register("/sw.js").then(reg => {
+    console.log("[PWA] Service Worker registered:", reg.scope);
+  }).catch(err => {
+    console.warn("[PWA] SW registration failed:", err);
+  });
+}
+
+/* ══════════════════════════════════════════════════════
+   ONLINE/OFFLINE DETECTION
+══════════════════════════════════════════════════════ */
+function updateOnlineStatus() {
+  isOnline = navigator.onLine;
+  const banner = document.getElementById("offline-banner");
+  const badge = document.getElementById("status-badge");
+  
+  if (!isOnline) {
+    banner.classList.add("show");
+    badge.className = "status-badge offline";
+    badge.innerHTML = '<span class="dot"></span> Offline';
+  } else if (dataMode === 'cloud') {
+    banner.classList.remove("show");
+    badge.className = "status-badge cloud";
+    badge.innerHTML = '<span class="dot"></span> Cloud';
+  } else {
+    banner.classList.remove("show");
+    badge.className = "status-badge";
+    badge.innerHTML = '<span class="dot"></span> Live';
+  }
+}
+
+window.addEventListener("online", () => { updateOnlineStatus(); loadAllData(); });
+window.addEventListener("offline", updateOnlineStatus);
+
+/* ══════════════════════════════════════════════════════
+   AUTH — Works both locally and via Supabase
+══════════════════════════════════════════════════════ */
+// ── CONTROL PLANE CONFIG (Central Supabase) ──
+const CONTROL_URL = "https://baawqrqihlhsrghvjlpx.supabase.co";
+const CONTROL_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJhYXdxcnFpaGxoc3JnaHZqbHB4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzU3Nzk2NzgsImV4cCI6MjA5MTM1NTY3OH0.h1mfhgS8G3IYcZ96L8T3YXkmxtbYJv95rJM39z1Clw0";
+
+async function attemptLogin() {
+  const emailInput = document.getElementById("shop-id-input").value.trim().toLowerCase();
+  const key = document.getElementById("master-key-input").value.trim();
+  if (!emailInput || !key) return;
+
+  const errorEl = document.getElementById("login-error");
+  
+  try {
+    const controlClient = supabase.createClient(CONTROL_URL, CONTROL_KEY);
+    // Find shop by owner_email
+    const { data: shops, error } = await controlClient
+      .from("shops")
+      .select("*")
+      .eq("owner_email", emailInput)
+      .limit(1);
+
+    if (error || !shops || shops.length === 0) {
+      errorEl.textContent = "❌ Account not found. Check Owner Email.";
+      errorEl.style.display = "block";
+      return;
+    }
+
+    const shop = shops[0];
+
+    if (shop.master_key !== key) {
+      errorEl.textContent = "❌ Invalid Master Key.";
+      errorEl.style.display = "block";
+      return;
+    }
+
+    // Success
+    shopId = shop.id;
+    localStorage.setItem("iva_shop_id", shopId);
+    localStorage.setItem("iva_auth_key", key);
+    localStorage.setItem("iva_supabase_url", shop.shop_supabase_url || CONTROL_URL);
+    localStorage.setItem("iva_supabase_key", shop.shop_supabase_key || CONTROL_KEY);
+    
+    initDataSource();
+    showApp();
+  } catch (e) {
+    errorEl.textContent = "❌ Error: " + e.message;
+    errorEl.style.display = "block";
+  }
+}
+
+let pairingSub = null;
+async function showPairingScreen() {
+  const emailInput = document.getElementById("shop-id-input").value.trim().toLowerCase();
+  if (!emailInput) { alert("Enter Owner Email first"); return; }
+  
+  document.getElementById("login-screen").classList.add("hidden");
+  document.getElementById("pairing-screen").classList.remove("hidden");
+  
+  const code = Math.floor(100000 + Math.random() * 900000).toString();
+  document.getElementById("pair-code-display").textContent = code;
+
+  const controlClient = supabase.createClient(CONTROL_URL, CONTROL_KEY);
+  await controlClient.from('pairing_codes').insert({
+    shop_id: sid,
+    code: code,
+    expires_at: new Date(Date.now() + 600000).toISOString(),
+    status: 'pending'
+  });
+
+  pairingSub = controlClient.channel('p').on('postgres_changes', { event:'UPDATE', schema:'public', table:'pairing_codes', filter:`code=eq.${code}` }, async (payload) => {
+    if (payload.new.status === 'used') {
+      document.getElementById("pair-status").textContent = "✅ Paired!";
+      const { data: shops } = await controlClient.from("shops").select("*").eq("owner_email", emailInput).limit(1);
+      if (shops && shops.length > 0) {
+        const s = shops[0];
+        localStorage.setItem("iva_shop_id", s.id);
+        localStorage.setItem("iva_auth_key", s.master_key);
+        localStorage.setItem("iva_supabase_url", s.shop_supabase_url || CONTROL_URL);
+        localStorage.setItem("iva_supabase_key", s.shop_supabase_key || CONTROL_KEY);
+        setTimeout(() => { hidePairingScreen(); initDataSource(); showApp(); }, 1000);
+      }
+    }
+  }).subscribe();
+}
+
+function hidePairingScreen() {
+  if (pairingSub) { supabaseClient.removeChannel(pairingSub); pairingSub = null; }
+  document.getElementById("pairing-screen").classList.add("hidden");
+  document.getElementById("login-screen").classList.remove("hidden");
+}
+
+document.getElementById("master-key-input").addEventListener("keydown", (e) => {
+  if (e.key === "Enter") attemptLogin();
+});
+
+function showApp() {
+  document.getElementById("login-screen").classList.add("hidden");
+  document.getElementById("app").classList.add("visible");
+  updateOnlineStatus();
+  loadAllData();
+  refreshInterval = setInterval(loadAllData, 30000);
+}
+
+// Auto-login if already authenticated or server provided key
+if (INJECTED_MASTER_KEY && !INJECTED_MASTER_KEY.includes("__MASTER_KEY__") && INJECTED_MASTER_KEY.trim().length > 0) {
+  localStorage.setItem("iva_auth_key", INJECTED_MASTER_KEY);
+}
+
+if (localStorage.getItem("iva_auth_key")) {
+  showApp();
+}
+
+/* ══════════════════════════════════════════════════════
+   TAB SWITCHING
+══════════════════════════════════════════════════════ */
+function switchTab(tab) {
+  document.querySelectorAll(".tab-page").forEach(p => p.classList.remove("visible"));
+  document.querySelectorAll(".nav-item").forEach(n => n.classList.remove("active"));
+  document.getElementById(`tab-${tab}`).classList.add("visible");
+  document.querySelector(`.nav-item[data-tab="${tab}"]`).classList.add("active");
+}
+
+/* ══════════════════════════════════════════════════════
+   DATA FETCH — Local API or Supabase Cloud
+══════════════════════════════════════════════════════ */
+async function apiFetch(endpoint) {
+  if (dataMode === 'local' && localAPI) {
+    try {
+      const res = await fetch(`${localAPI}${endpoint}`, { signal: AbortSignal.timeout(5000) });
+      return await res.json();
+    } catch (e) {
+      console.warn(`[API] Local fetch failed: ${endpoint}`, e.message);
+      // Auto-fallback to cloud if local fails
+      if (supabaseClient) {
+        console.log("[API] Falling back to cloud mode...");
+        dataMode = 'cloud';
+        updateOnlineStatus();
+        return await fetchFromCloud();
+      }
+      return null;
+    }
+  }
+  return null;
+}
+
+// Fetch ALL data from Supabase shop_stats snapshot
+async function fetchFromCloud() {
+  if (!supabaseClient || !shopId) {
+    console.warn("[Cloud] No Supabase client or shop ID");
+    return null;
+  }
+  try {
+    const { data, error } = await supabaseClient
+      .from("shop_stats")
+      .select("stats_json, updated_at")
+      .eq("shop_id", shopId)
+      .single();
+    
+    if (error) {
+      console.error("[Cloud] Fetch error:", error.message);
+      return null;
+    }
+    
+    if (data && data.stats_json) {
+      console.log("[Cloud] Stats loaded, last updated:", data.updated_at);
+      return data.stats_json;
+    }
+    return null;
+  } catch(e) {
+    console.error("[Cloud] Error:", e.message);
+    return null;
+  }
+}
+
+/* ══════════════════════════════════════════════════════
+   LOAD ALL DATA — Smart routing (local → cloud)
+══════════════════════════════════════════════════════ */
+async function loadAllData() {
+  const indicator = document.getElementById("refresh-indicator");
+  indicator.classList.add("show");
+
+  try {
+    if (dataMode === 'cloud') {
+      // ═══ CLOUD MODE: Read everything from Supabase shop_stats ═══
+      const cloudStats = await fetchFromCloud();
+      if (cloudStats) {
+        renderOverview(cloudStats);
+        // Cloud stats has all alert data embedded
+        renderExpiry({
+          expired: cloudStats.expiredProducts || [],
+          nearExpiry: cloudStats.expiringProducts || []
+        });
+        renderStock({
+          lowStock: cloudStats.lowStockProducts || [],
+          outOfStock: cloudStats.outOfStockProducts || [],
+          deadStock: cloudStats.deadStock || []
+        });
+        // Invoices from cloud snapshot
+        if (cloudStats.recentInvoices) {
+          renderInvoices(cloudStats.recentInvoices);
+        }
+        // Analytics from cloud snapshot
+        renderAnalytics(cloudStats);
+        statsData = cloudStats;
+        
+        // Update time label with cloud timestamp
+        document.getElementById("time-label").textContent = 
+          `Cloud sync · ${new Date().toLocaleTimeString("en-IN", { hour: "2-digit", minute: "2-digit" })}`;
+      }
+    } else {
+      // ═══ LOCAL MODE: Fetch from API endpoints ═══
+      const [stats, expiry, stock, invoices, analytics, notifs] = await Promise.all([
+        apiFetch("/api/stats"),
+        apiFetch("/api/expiry"),
+        apiFetch("/api/stock"),
+        apiFetch("/api/invoices"),
+        apiFetch("/api/analytics"),
+        apiFetch("/api/notifications?limit=20"),
+      ]);
+
+      if (stats) renderOverview(stats);
+      if (expiry) renderExpiry(expiry);
+      if (stock) renderStock(stock);
+      if (invoices) renderInvoices(invoices);
+      if (analytics) renderAnalytics(analytics);
+      if (notifs) renderNotifications(notifs);
+      if (stats) statsData = stats;
+
+      document.getElementById("time-label").textContent = 
+        `Last updated · ${new Date().toLocaleTimeString("en-IN", { hour: "2-digit", minute: "2-digit" })}`;
+    }
+  } catch(e) {
+    console.error("[Load] Error:", e);
+  }
+  
+  setTimeout(() => indicator.classList.remove("show"), 800);
+}
+
+/* ══════════════════════════════════════════════════════
+   RENDER: OVERVIEW
+══════════════════════════════════════════════════════ */
+function renderOverview(s) {
+  // Hero
+  const profit = s.todayProfit || 0;
+  const heroEl = document.getElementById("hero-profit");
+  heroEl.textContent = `₹${formatNum(profit)}`;
+  heroEl.className = `hero-value ${profit >= 0 ? 'profit-positive' : 'profit-negative'}`;
+
+  document.getElementById("hero-revenue").textContent = `₹${formatNum(s.todaySales || 0)}`;
+  document.getElementById("hero-cost").textContent = `₹${formatNum(s.todayCost || 0)}`;
+  document.getElementById("hero-bills").textContent = s.todayBills || 0;
+
+  // Metrics
+  document.getElementById("m-products").textContent = s.totalProducts || 0;
+  document.getElementById("m-categories").textContent = s.totalCategories || 0;
+  document.getElementById("m-low-stock").textContent = s.lowStockCount || 0;
+  document.getElementById("m-out-stock").textContent = s.outOfStock || 0;
+  document.getElementById("m-near-expiry").textContent = s.nearExpiryCount || 0;
+  document.getElementById("m-expired").textContent = s.expiredCount || 0;
+
+  // Profit Summary (with Overall)
+  setProfit("profit-today", s.todayProfit);
+  setProfit("profit-week", s.weeklyProfit);
+  setProfit("profit-month", s.monthlyProfit);
+  setProfit("profit-overall", s.overallProfit);
+
+  // Daily Sales Chart
+  if (s.dailySales && s.dailySales.length > 0) {
+    renderDailyChart(s.dailySales);
+  }
+
+  // Monthly Chart
+  if (s.monthlySalesBreakdown && s.monthlySalesBreakdown.length > 0) {
+    renderMonthlyChart(s.monthlySalesBreakdown);
+  }
+
+  // Top Sellers
+  if (s.topSelling) {
+    renderTopSellers(s.topSelling);
+  }
+}
+
+function setProfit(id, val) {
+  const el = document.getElementById(id);
+  if (!el) return;
+  const v = val || 0;
+  el.textContent = `₹${formatNum(v)}`;
+  el.className = v >= 0 ? "profit-positive" : "profit-negative";
+  el.style.fontSize = "18px";
+  el.style.fontWeight = "800";
+}
+
+function formatNum(n) {
+  if (n >= 100000) return (n / 100000).toFixed(1) + "L";
+  if (n >= 1000) return (n / 1000).toFixed(1) + "K";
+  return Number(n).toFixed(0);
+}
+
+function formatCurrency(n) {
+  return "₹" + Number(n || 0).toLocaleString("en-IN", { minimumFractionDigits: 0, maximumFractionDigits: 0 });
+}
+
+/* ══════════════════════════════════════════════════════
+   CHARTS
+══════════════════════════════════════════════════════ */
+function renderDailyChart(data) {
+  const ctx = document.getElementById("chart-daily");
+  if (charts.daily) charts.daily.destroy();
+
+  charts.daily = new Chart(ctx, {
+    type: "bar",
+    data: {
+      labels: data.map(d => {
+        const dt = new Date(d.day + 'T00:00:00');
+        return dt.toLocaleDateString("en-IN", { weekday: "short", day: "numeric" });
+      }),
+      datasets: [{
+        data: data.map(d => d.total),
+        backgroundColor: "rgba(99,102,241,0.6)",
+        borderColor: "rgba(99,102,241,1)",
+        borderWidth: 1,
+        borderRadius: 6,
+        barPercentage: 0.6,
+      }]
+    },
+    options: chartOptions("₹")
+  });
+}
+
+function renderMonthlyChart(data) {
+  const ctx = document.getElementById("chart-monthly");
+  if (charts.monthly) charts.monthly.destroy();
+
+  charts.monthly = new Chart(ctx, {
+    type: "line",
+    data: {
+      labels: data.map(d => {
+        const [y, m] = d.month.split("-");
+        return new Date(y, m - 1).toLocaleDateString("en-IN", { month: "short" });
+      }),
+      datasets: [{
+        data: data.map(d => d.total),
+        borderColor: "#22c55e",
+        backgroundColor: "rgba(34,197,94,0.08)",
+        fill: true,
+        tension: 0.4,
+        pointRadius: 4,
+        pointBackgroundColor: "#22c55e",
+        borderWidth: 2,
+      }]
+    },
+    options: chartOptions("₹")
+  });
+}
+
+function chartOptions(prefix) {
+  return {
+    responsive: true,
+    maintainAspectRatio: false,
+    plugins: { legend: { display: false } },
+    scales: {
+      x: {
+        grid: { display: false },
+        ticks: { color: "#555", font: { size: 10, family: "'Inter'" } },
+        border: { display: false }
+      },
+      y: {
+        grid: { color: "#1a1a24" },
+        ticks: {
+          color: "#555",
+          font: { size: 10, family: "'Inter'" },
+          callback: (v) => prefix + formatNum(v)
+        },
+        border: { display: false }
+      }
+    }
+  };
+}
+
+function renderTopSellers(items) {
+  const el = document.getElementById("top-sellers");
+  if (!items || items.length === 0) {
+    el.innerHTML = '<div class="empty-state"><div class="emoji">📊</div><div class="msg">No sales data yet</div></div>';
+    return;
+  }
+  el.innerHTML = items.map((p, i) => `
+    <div class="top-item">
+      <div class="top-rank">${i + 1}</div>
+      <div class="top-info">
+        <div class="top-name">${esc(p.name)}</div>
+        <div class="top-sold">${p.total_sold || p.sold || 0} units sold</div>
+      </div>
+      <div class="top-revenue">${formatCurrency(p.revenue || 0)}</div>
+    </div>
+  `).join("");
+}
+
+/* ══════════════════════════════════════════════════════
+   RENDER: ALERTS
+══════════════════════════════════════════════════════ */
+function renderExpiry(data) {
+  document.getElementById("a-expired").textContent = data.expired?.length || 0;
+  document.getElementById("a-near-expiry").textContent = data.nearExpiry?.length || 0;
+
+  renderProductList("expired-list", data.expired, "red");
+  renderProductList("near-expiry-list", data.nearExpiry, "amber");
+}
+
+function renderStock(data) {
+  renderProductList("low-stock-list", data.lowStock, "amber");
+  renderProductList("out-stock-list", data.outOfStock, "red");
+  renderProductList("dead-stock-list", data.deadStock, "text-3");
+}
+
+function renderProductList(containerId, items, color) {
+  const el = document.getElementById(containerId);
+  if (!items || items.length === 0) {
+    el.innerHTML = '<div class="empty-state" style="padding:16px;"><div class="msg" style="font-size:12px;">✅ No items</div></div>';
+    return;
+  }
+  el.innerHTML = items.map(p => `
+    <div class="product-item">
+      <div>
+        <div class="p-name">${esc(p.name)}</div>
+        <div class="p-meta">${p.category_name || '—'} ${p.expiry_date ? '· Exp: ' + p.expiry_date : ''}</div>
+      </div>
+      <div class="p-qty" style="background:var(--${color}-bg, var(--bg-card-2)); color:var(--${color}, var(--text-3));">
+        ${p.quantity ?? '—'}
+      </div>
+    </div>
+  `).join("");
+}
+
+/* ══════════════════════════════════════════════════════
+   RENDER: INVOICES
+══════════════════════════════════════════════════════ */
+function renderInvoices(invoices) {
+  const el = document.getElementById("invoice-list");
+  if (!invoices || invoices.length === 0) {
+    el.innerHTML = '<div class="empty-state"><div class="emoji">🧾</div><div class="msg">No invoices yet</div></div>';
+    return;
+  }
+  el.innerHTML = invoices.slice(0, 50).map(inv => `
+    <div class="invoice-item">
+      <div class="invoice-header">
+        <div class="invoice-id">#${inv.bill_no || inv.id} · ${inv.customer_name || 'Walk-in'}</div>
+        <div class="invoice-amount">${formatCurrency(inv.total_amount)}</div>
+      </div>
+      <div class="invoice-meta">
+        ${inv.bill_date || '—'} · ${inv.payment_mode || 'Cash'} ${inv.customer_phone ? '· ' + inv.customer_phone : ''}
+      </div>
+      ${inv.productsList ? `<div class="invoice-products">🛒 ${esc(inv.productsList)}</div>` : ''}
+    </div>
+  `).join("");
+}
+
+/* ══════════════════════════════════════════════════════
+   RENDER: ANALYTICS & AI
+══════════════════════════════════════════════════════ */
+function renderAnalytics(data) {
+  // Payment Breakdown (Doughnut)
+  if (data.paymentBreakdown || (statsData && statsData.paymentBreakdown)) {
+    const pb = data.paymentBreakdown || statsData.paymentBreakdown || [];
+    if (pb.length > 0) {
+      const ctx = document.getElementById("chart-payments");
+      if (charts.payments) charts.payments.destroy();
+      
+      const colors = ["#6366f1", "#22c55e", "#f59e0b", "#ef4444", "#06b6d4", "#8b5cf6"];
+      charts.payments = new Chart(ctx, {
+        type: "doughnut",
+        data: {
+          labels: pb.map(p => p.payment_mode || "Unknown"),
+          datasets: [{
+            data: pb.map(p => p.total),
+            backgroundColor: colors.slice(0, pb.length),
+            borderWidth: 0
+          }]
+        },
+        options: {
+          responsive: true, maintainAspectRatio: false,
+          cutout: "65%",
+          plugins: {
+            legend: { position: "bottom", labels: { color: "#888", font: { size: 11, family: "'Inter'" }, padding: 12 } }
+          }
+        }
+      });
+    }
+  }
+
+  // Peak Hours (Bar)
+  if (data.peakHours) {
+    const ph = data.peakHours.sort((a, b) => Number(a.hour) - Number(b.hour));
+    if (ph.length > 0) {
+      const ctx = document.getElementById("chart-peak");
+      if (charts.peak) charts.peak.destroy();
+      
+      charts.peak = new Chart(ctx, {
+        type: "bar",
+        data: {
+          labels: ph.map(h => `${h.hour}:00`),
+          datasets: [{
+            data: ph.map(h => h.bills),
+            backgroundColor: ph.map(h => h.bills > 5 ? "rgba(34,197,94,0.6)" : "rgba(99,102,241,0.4)"),
+            borderRadius: 4,
+            barPercentage: 0.7,
+          }]
+        },
+        options: {
+          ...chartOptions(""),
+          scales: {
+            ...chartOptions("").scales,
+            y: {
+              ...chartOptions("").scales.y,
+              ticks: { ...chartOptions("").scales.y.ticks, callback: v => v + " bills" }
+            }
+          }
+        }
+      });
+    }
+  }
+}
+
+/* ══════════════════════════════════════════════════════
+   AI CHATBOT — Gemini RAG
+══════════════════════════════════════════════════════ */
+let aiLoading = false;
+
+function setAndSend(text) {
+  document.getElementById('chat-input').value = text;
+  askAI();
+}
+
+async function askAI() {
+  if (aiLoading) return;
+
+  const input    = document.getElementById("chat-input");
+  const question = input.value.trim();
+  if (!question) return;
+
+  const messages = document.getElementById("chat-messages");
+  const sendBtn  = document.getElementById("chat-send-btn");
+
+  // User bubble
+  messages.innerHTML += `
+    <div class="chat-msg-row user">
+      <div class="chat-msg-icon user">&#x1F464;</div>
+      <div class="chat-bubble user">${esc(question)}</div>
+    </div>`;
+  input.value = "";
+  messages.scrollTop = messages.scrollHeight;
+
+  // Typing indicator
+  const typingId = 'typing-' + Date.now();
+  messages.innerHTML += `
+    <div class="chat-msg-row bot" id="${typingId}">
+      <div class="chat-msg-icon bot">&#x1F916;</div>
+      <div class="chat-bubble bot chat-typing">
+        <div class="chat-typing-dot"></div>
+        <div class="chat-typing-dot"></div>
+        <div class="chat-typing-dot"></div>
+      </div>
+    </div>`;
+  messages.scrollTop = messages.scrollHeight;
+
+  aiLoading = true;
+  if (sendBtn) sendBtn.disabled = true;
+
+  try {
+    let answer = null;
+
+    // LOCAL mode: call Gemini via backend RAG API
+    if (dataMode === 'local' && localAPI) {
+      try {
+        const res = await fetch(`${localAPI}/api/ai/ask`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ question }),
+          signal: AbortSignal.timeout(30000)
+        });
+        const data = await res.json();
+        answer = data.answer;
+      } catch (fetchErr) {
+        console.warn('[AI] Local API failed, using client-side fallback');
+      }
+    }
+
+    // CLOUD mode or fallback: use client-side AI from cached statsData
+    if (!answer) answer = localAI(question);
+
+    const typingEl = document.getElementById(typingId);
+    if (typingEl) typingEl.remove();
+
+    messages.innerHTML += `
+      <div class="chat-msg-row bot">
+        <div class="chat-msg-icon bot">&#x1F916;</div>
+        <div class="chat-bubble bot">${esc(answer)}</div>
+      </div>`;
+
+  } catch (e) {
+    const typingEl = document.getElementById(typingId);
+    if (typingEl) typingEl.remove();
+    messages.innerHTML += `
+      <div class="chat-msg-row bot">
+        <div class="chat-msg-icon bot">&#x1F916;</div>
+        <div class="chat-bubble bot">&#x26A0;&#xFE0F; Could not reach AI. Check connection and try again.</div>
+      </div>`;
+  } finally {
+    aiLoading = false;
+    if (sendBtn) sendBtn.disabled = false;
+    messages.scrollTop = messages.scrollHeight;
+  }
+}
+
+// Client-side AI using cached statsData (works in cloud mode)
+function localAI(question) {
+  const q = question.toLowerCase();
+  const s = statsData;
+  if (!s) return "I don't have data loaded yet. Please refresh!";
+
+  if (q.includes("sale") || q.includes("revenue")) {
+    return `Today's sales: ₹${formatNum(s.todaySales || 0)}. This week: ₹${formatNum(s.weeklySales || 0)}. This month: ₹${formatNum(s.monthlySales || 0)}.`;
+  }
+  if (q.includes("profit")) {
+    return `Today's profit: ₹${formatNum(s.todayProfit || 0)}. Weekly: ₹${formatNum(s.weeklyProfit || 0)}. Monthly: ₹${formatNum(s.monthlyProfit || 0)}. Overall: ₹${formatNum(s.overallProfit || 0)}.`;
+  }
+  if (q.includes("top") || q.includes("best") || q.includes("popular")) {
+    const top = (s.topSelling || s.topProducts || []).slice(0, 3);
+    if (top.length === 0) return "No sales data available yet.";
+    return "Top sellers: " + top.map((p, i) => `${i+1}. ${p.name} (${p.total_sold || p.sold} sold)`).join(", ");
+  }
+  if (q.includes("stock") || q.includes("low")) {
+    return `Low stock: ${s.lowStockCount || 0} items. Out of stock: ${s.outOfStock || 0} items.`;
+  }
+  if (q.includes("expir")) {
+    return `Expired: ${s.expiredCount || 0} products. Expiring soon: ${s.nearExpiryCount || 0} products.`;
+  }
+  if (q.includes("product")) {
+    return `You have ${s.totalProducts || 0} products across ${s.totalCategories || 0} categories.`;
+  }
+  return "I can tell you about sales, profit, top products, stock alerts, or expiry status!";
+}
+
+document.getElementById("chat-input").addEventListener("keydown", (e) => {
+  if (e.key === "Enter") askAI();
+});
+
+/* ══════════════════════════════════════════════════════
+   NOTIFICATIONS
+══════════════════════════════════════════════════════ */
+function renderNotifications(data) {
+  const badge = document.getElementById("notif-badge");
+  const unread = data.unreadCount || 0;
+  if (unread > 0) {
+    badge.textContent = unread > 99 ? '99+' : unread;
+    badge.style.display = 'flex';
+  } else {
+    badge.style.display = 'none';
+  }
+
+  const el = document.getElementById("notif-list");
+  const notifs = data.notifications || [];
+  if (notifs.length === 0) {
+    el.innerHTML = '<div class="empty-state" style="padding:16px;"><div class="msg" style="font-size:12px;">✅ No notifications</div></div>';
+    return;
+  }
+
+  const iconMap = {
+    'EXPIRY': { icon: '⚠️', bg: 'var(--amber-bg)', color: 'var(--amber)' },
+    'NEAR_EXPIRY': { icon: '⏰', bg: 'var(--amber-bg)', color: 'var(--amber)' },
+    'LOW_STOCK': { icon: '📉', bg: 'var(--amber-bg)', color: 'var(--amber)' },
+    'OUT_OF_STOCK': { icon: '🚫', bg: 'var(--red-bg)', color: 'var(--red)' },
+    'DEAD_STOCK': { icon: '💤', bg: 'var(--cyan-bg)', color: 'var(--cyan)' },
+  };
+
+  el.innerHTML = notifs.map(n => {
+    const meta = iconMap[n.type] || { icon: '🔔', bg: 'var(--accent-glow)', color: 'var(--accent)' };
+    const isUnread = !n.is_read;
+    const timeAgo = getTimeAgo(n.created_at);
+    return `
+      <div class="notif-item ${isUnread ? 'unread' : ''}" id="notif-${n.id}">
+        <div class="notif-icon" style="background:${meta.bg};">${meta.icon}</div>
+        <div class="notif-body">
+          <div class="notif-title" style="color:${meta.color};">${esc(n.title || n.type)}</div>
+          <div class="notif-msg">${esc(n.message)}</div>
+          <div class="notif-time">${timeAgo}</div>
+        </div>
+        <button class="notif-dismiss" onclick="dismissNotif(${n.id})" title="Dismiss">×</button>
+      </div>
+    `;
+  }).join('');
+}
+
+function getTimeAgo(dateStr) {
+  const now = new Date();
+  const then = new Date(dateStr);
+  const diff = Math.floor((now - then) / 1000);
+  if (diff < 60) return 'Just now';
+  if (diff < 3600) return Math.floor(diff / 60) + 'm ago';
+  if (diff < 86400) return Math.floor(diff / 3600) + 'h ago';
+  return Math.floor(diff / 86400) + 'd ago';
+}
+
+async function dismissNotif(id) {
+  const el = document.getElementById('notif-' + id);
+  if (el) el.style.opacity = '0';
+  try {
+    if (dataMode === 'local') {
+      await fetch(`${localAPI}/api/notifications/${id}`, { method: 'DELETE' });
+    }
+    setTimeout(() => { if (el) el.remove(); }, 300);
+    // Refresh badge count
+    if (dataMode === 'local') {
+      const data = await apiFetch('/api/notifications?limit=1');
+      if (data) {
+        const badge = document.getElementById('notif-badge');
+        const unread = data.unreadCount || 0;
+        badge.textContent = unread > 99 ? '99+' : unread;
+        badge.style.display = unread > 0 ? 'flex' : 'none';
+      }
+    }
+  } catch(e) {}
+}
+
+async function markAllRead() {
+  try {
+    if (dataMode === 'local') {
+      await fetch(`${localAPI}/api/notifications/read`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({})
+      });
+    }
+    document.querySelectorAll('.notif-item.unread').forEach(el => el.classList.remove('unread'));
+    const badge = document.getElementById('notif-badge');
+    badge.style.display = 'none';
+  } catch(e) {}
+}
+
+/* ══════════════════════════════════════════════════════
+   UTILITIES
+══════════════════════════════════════════════════════ */
+function esc(str) {
+  if (!str) return "";
+  const el = document.createElement("span");
+  el.textContent = str;
+  return el.innerHTML;
+}
+</script>
+</body>
+</html>
