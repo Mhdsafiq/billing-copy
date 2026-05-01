@@ -318,7 +318,7 @@ function App() {
         display: 'flex', alignItems: 'center', justifyContent: 'center', backdropFilter: 'blur(10px)'
       }}>
         <div style={{
-          background: 'linear-gradient(180deg, #1e293b, #0f172a)',
+          background: '#1e293b',
           border: '1px solid #334155', borderRadius: 24, padding: 40,
           maxWidth: 480, textAlign: 'center', color: 'white',
           boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.5)'
@@ -357,7 +357,6 @@ function App() {
       <div className="enterprise-container" style={{ visibility: lockData ? 'hidden' : 'visible' }}>
 
         <aside className="enterprise-sidebar">
-          {/* Sidebar Branding Area */}
           <div className="sidebar-brand">
             {appSettings.billLogo ? (
               <img src={appSettings.billLogo} alt="Logo" className="brand-logo-img" />
@@ -372,10 +371,9 @@ function App() {
             </div>
           </div>
 
-          {/* Navigation Menu */}
           <nav className="sidebar-menu">
             <div className="sidebar-group">
-              <div className="sidebar-heading">Management</div>
+              <div className="sidebar-heading">Intelligence Engine</div>
               {navItems.map(item => (
                 <div 
                   key={item.id} 
@@ -389,11 +387,10 @@ function App() {
             </div>
           </nav>
 
-          {/* Bottom Area */}
           <div className="sidebar-bottom">
             {shopId && (
               <button onClick={() => setShowPairing(true)} className="btn-sidebar-secondary">
-                🔗 Pair Mobile Device
+                🔗 Cloud Sync Paired
               </button>
             )}
             <button 
@@ -406,82 +403,62 @@ function App() {
                 }
               }} 
               className="btn-sidebar-whatsapp"
-              style={{ color: waStatus === 'ready' ? '#16a34a' : undefined }}
+              style={{ 
+                borderColor: waStatus === 'ready' ? '#22c55e' : undefined,
+                color: waStatus === 'ready' ? '#22c55e' : undefined,
+                background: waStatus === 'ready' ? 'rgba(34, 197, 94, 0.1)' : undefined
+              }}
             >
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51a12.8 12.8 0 0 0-.57-.01c-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 0 1-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 0 1-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 0 1 2.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0 0 12.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 0 0 5.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 0 0-3.48-8.413Z"/></svg>
-              {waStatus === 'ready' ? 'WhatsApp Connected' : waStatus === 'qr' ? 'Scan to Connect' : 'Connect to WhatsApp'}
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style={{ marginRight: 8 }}><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51a12.8 12.8 0 0 0-.57-.01c-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 0 1-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 0 1-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 0 1 2.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0 0 12.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 0 0 5.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 0 0-3.48-8.413Z"/></svg>
+              {waStatus === 'ready' ? 'Whatsapp Online' : waStatus === 'qr' ? 'Action Required' : 'Sync Whatsapp'}
             </button>
           </div>
         </aside>
 
-        {/* ── Main Workspace ──────────────────────────────────── */}
         <main className="enterprise-main">
-
-          {/* ── Payment Reminder Banner ── */}
           {validityWarning && (
             <div style={{
-              background: validityWarning.daysLeft <= 3 
-                ? 'linear-gradient(135deg, #ef4444, #dc2626)'
-                : 'linear-gradient(135deg, #f59e0b, #d97706)',
-              padding: '12px 20px',
+              background: '#f43f5e',
+              padding: '14px 40px',
               display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-              color: 'white', fontSize: 13, fontWeight: 700,
-              animation: validityWarning.daysLeft <= 3 ? 'pulse 1.5s ease-in-out infinite' : 'pulse 2s ease-in-out infinite',
-              borderBottom: validityWarning.daysLeft <= 3 ? '2px solid #991b1b' : '2px solid #b45309'
+              color: 'white', fontSize: 13, fontWeight: 800,
+              boxShadow: '0 4px 20px rgba(244, 63, 94, 0.3)',
+              zIndex: 100
             }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: 10, flex: 1 }}>
-                <span style={{ fontSize: 22 }}>{validityWarning.daysLeft <= 3 ? '🚨' : '⚠️'}</span>
-                <div>
-                  <div style={{ fontSize: 14, fontWeight: 800, marginBottom: 2 }}>
-                    {validityWarning.daysLeft <= 1 
-                      ? '⚡ LAST DAY! Subscription expires TODAY'
-                      : `Subscription expires in ${validityWarning.daysLeft} day${validityWarning.daysLeft !== 1 ? 's' : ''}`
-                    }
-                  </div>
-                  <div style={{ fontSize: 11.5, opacity: 0.9, fontWeight: 500 }}>
-                    💳 Please complete your subscription payment to continue using the application. Contact admin to activate.
-                  </div>
-                </div>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+                <span style={{ fontSize: '20px' }}>⚡</span>
+                <span>SECURITY NOTICE: YOUR SUBSCRIPTION ENDS IN {validityWarning.daysLeft} DAYS. RENEW TO PREVENT LOCKOUT.</span>
               </div>
-              <button onClick={() => { setValidityWarning(null); setWarningDismissed(true); }} style={{
-                background: 'rgba(255,255,255,0.2)', border: 'none', color: 'white',
-                padding: '6px 14px', borderRadius: 6, cursor: 'pointer', fontSize: 11, fontWeight: 700,
-                whiteSpace: 'nowrap'
-              }}>Remind Later</button>
+              <button onClick={() => { setValidityWarning(null); setWarningDismissed(true); }} className="btn-outline" style={{ background: 'rgba(255,255,255,0.2)', color: '#fff', border: 'none', padding: '6px 16px', fontSize: '11px' }}>ACKNOWLEDGE</button>
             </div>
           )}
           
-          {/* Dashboard Header */}
           <header className="enterprise-header">
             <div className="header-breadcrumbs">
-              <span className="breadcrumb-muted">Innoaivators</span>
+              <span className="breadcrumb-muted">MASTER CONTROL</span>
               <span className="breadcrumb-separator">/</span>
               <span className="breadcrumb-active">
-                {currentView === 'pos' ? 'Billing Terminal' :
-                 currentView === 'history' ? 'Invoice History' :
-                 currentView === 'product_list' ? 'Master Inventory' :
-                 currentView === 'add_product' ? 'Register Product' :
-                 currentView === 'bulk_update' ? 'Bulk inward' : 
-                 currentView === 'offers' ? 'Offers & Promos' : 'Settings'}
+                {currentView === 'pos' ? 'BILLING TERMINAL' :
+                 currentView === 'history' ? 'LEDGER HISTORY' :
+                 currentView === 'product_list' ? 'CATALOG MASTER' :
+                 currentView === 'add_product' ? 'REGISTER ENTITY' :
+                 currentView === 'bulk_update' ? 'BULK INWARD' : 
+                 currentView === 'offers' ? 'CAMPAIGNS' : 'CORE SETTINGS'}
               </span>
             </div>
 
             <div className="header-right">
-              <button 
-                onClick={handleRefresh} 
-                className="header-btn">
-                <span>🔄</span> Refresh
+              <button onClick={handleRefresh} className="header-btn">
+                <span>🔄</span> RELOAD
               </button>
-              <div style={{ width: 1, height: 24, background: 'var(--border)', margin: '0 8px' }}></div>
-              <button 
-                onClick={() => window.api?.minimizeWindow()} 
-                className="header-btn" title="Minimize">
-                <span>➖</span>
+              <div style={{ width: 1, height: 20, background: 'rgba(255,255,255,0.1)', margin: '0 8px' }}></div>
+              <button onClick={() => window.api?.minimizeWindow()} className="header-btn" title="Minimize">
+                <span>−</span>
               </button>
               <button 
-                onClick={() => { if(confirm('Are you sure you want to close the application?')) window.api?.closeWindow() }} 
-                className="header-btn btn-close-app" title="Close Application">
-                <span>✖️</span>
+                onClick={() => { if(confirm('TERMINATE SESSION? All unsaved work will be lost.')) window.api?.closeWindow() }} 
+                className="header-btn" style={{ color: 'var(--danger)', borderColor: 'rgba(244, 63, 94, 0.2)' }} title="Close">
+                <span>✕</span>
               </button>
             </div>
           </header>
@@ -497,30 +474,8 @@ function App() {
           </div>
         </main>
 
-        {/* ── WhatsApp QR Modal ─────────────────────────────── */}
         {showQR && <WhatsAppQRModal qrData={qrData} onClose={() => setShowQR(false)} />}
-
-        {/* ── Pairing Code Modal ─────────────────────────────── */}
         {showPairing && <PairingCode shopId={shopId} onClose={() => setShowPairing(false)} />}
-
-        {/* ── Validity Warning Modal ─────────────────────────────── */}
-        {validityWarning && !warningDismissed && (
-          <div className="modal-overlay" style={{ zIndex: 9999 }}>
-            <div className="modal-content" style={{ maxWidth: '420px', textAlign: 'center', padding: '30px', borderRadius: '16px', background: '#1e293b', border: '1px solid #eab308' }}>
-              <div style={{ fontSize: '40px', marginBottom: '10px' }}>\u23f3</div>
-              <h2 style={{ color: '#f8fafc', marginBottom: '10px', fontSize: '20px' }}>Subscription Notice</h2>
-              <p style={{ color: '#cbd5e1', fontSize: '15px', marginBottom: '25px' }}>
-                Only <strong style={{ color: '#eab308' }}>{validityWarning.daysLeft} days</strong> remaining. Please pay the subscription amount.
-              </p>
-              <button 
-                onClick={() => { setWarningDismissed(true); setValidityWarning(null); }}
-                style={{ background: '#3b82f6', color: 'white', padding: '10px 24px', borderRadius: '8px', border: 'none', fontWeight: 'bold', cursor: 'pointer', outline: 'none' }}>
-                OK
-              </button>
-            </div>
-          </div>
-        )}
-
       </div>
     </ErrorBoundary>
   );

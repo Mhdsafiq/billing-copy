@@ -21,7 +21,7 @@ export default function LockScreen({ reason, expiry }) {
       position: "fixed",
       inset: 0,
       zIndex: 999999,
-      background: "linear-gradient(135deg, #020617, #0f172a, #020617)",
+      background: "#020617",
       display: "flex",
       flexDirection: "column",
       alignItems: "center",
@@ -53,7 +53,7 @@ export default function LockScreen({ reason, expiry }) {
         fontWeight: 800, 
         marginBottom: 20, 
         letterSpacing: "-0.03em",
-        background: "linear-gradient(to bottom, #fff, #94a3b8)",
+        background: "#fff",
         WebkitBackgroundClip: "text",
         WebkitTextFillColor: "transparent"
       }}>
@@ -105,7 +105,7 @@ export default function LockScreen({ reason, expiry }) {
           disabled={loading}
           style={{
             marginTop: 40,
-            background: "linear-gradient(135deg, #6366f1, #a855f7)",
+            background: "#6366f1",
             color: "#fff",
             border: "none",
             padding: "16px 32px",

@@ -63,126 +63,127 @@ export default function BulkUpdate() {
   const hasChanges = Object.values(updates).some(val => Number(val) !== 0);
 
   return (
-    <div style={{ maxWidth: 1200, margin: '0 auto', width: '100%', height: '100%', display: 'flex', flexDirection: 'column' }}>
-      
-      {/* Page Title & Actions */}
-      <div className="page-title" style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-        <PackagePlus size={24} color="var(--primary)" />
-        Bulk Stock Inward
-        {hasChanges && (
-          <button className="btn btn-primary" onClick={processUpdate} style={{ marginLeft: 'auto' }}>
-            <Save size={18} style={{ marginRight: 6 }} /> 
-            Save All {Object.keys(updates).filter(k => updates[k] !== "").length} Changes
-          </button>
-        )}
-      </div>
-
-      <div className="modern-card" style={{ flex: 1, display: 'flex', flexDirection: 'column', padding: 0, overflow: 'hidden' }}>
+    <div className="animate-fade" style={{ padding: '40px', height: '100%', overflowY: 'auto' }}>
+      <div style={{ maxWidth: '1200px', margin: '0 auto' }}>
         
-        {/* Search Bar matching history filter approach */}
-        <div style={{ padding: '14px 24px', borderBottom: '1px solid var(--border)', display: 'flex', alignItems: 'center' }}>
-          <div style={{ position: 'relative', width: 400 }}>
-            <input
-              type="text"
-              autoFocus
-              className="form-input"
-              placeholder="🔍 Search product to update stock..."
-              value={filter}
-              onChange={e => setFilter(e.target.value)}
-              style={{ width: '100%', paddingLeft: 14, height: 40, fontSize: 13 }}
-            />
+        <header style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', marginBottom: '40px' }}>
+          <div>
+            <h1 className="text-gradient" style={{ margin: 0, fontSize: '36px', fontWeight: 950, letterSpacing: '-0.04em' }}>Inventory Inflow</h1>
+            <p style={{ color: 'var(--text-3)', fontSize: '15px', marginTop: '4px', fontWeight: 500 }}>Update stock levels for multiple entities simultaneously</p>
           </div>
-          <div style={{ marginLeft: 'auto', display: 'flex', gap: 8, alignItems: 'center', color: 'var(--text-3)', fontSize: 13, fontWeight: 500 }}>
-            Fast bulk entry ({filteredProducts.length} items)
-          </div>
+          <button 
+            onClick={processUpdate} 
+            className="btn-primary" 
+            style={{ 
+              padding: '14px 32px', fontSize: '15px', fontWeight: 800,
+              display: 'flex', alignItems: 'center', gap: '10px',
+              opacity: hasChanges ? 1 : 0.6,
+              pointerEvents: hasChanges ? 'auto' : 'none'
+            }}
+          >
+            <Save size={20} />
+            {hasChanges ? "SAVE PROTOCOL" : "NO CHANGES"}
+          </button>
+        </header>
+
+        <div style={{ position: 'relative', marginBottom: '32px' }}>
+          <Search style={{ position: 'absolute', left: '20px', top: '50%', transform: 'translateY(-50%)', color: 'var(--primary)' }} size={20} />
+          <input 
+            className="input-premium" 
+            placeholder="Query nomenclature or scan barcode..." 
+            value={filter}
+            onChange={(e) => setFilter(e.target.value)}
+            style={{ width: '100%', paddingLeft: '56px', height: '60px', fontSize: '16px' }}
+          />
         </div>
 
-        {/* Minimalist Data Header (Matching History Style) */}
-        <div style={{
-          display: 'flex',
-          padding: '14px 24px',
-          borderBottom: '1px solid var(--border)',
-          fontSize: 11, 
-          fontWeight: 800, 
-          color: 'var(--text-3)',
-          textTransform: 'uppercase', 
-          letterSpacing: '.06em',
-          gap: 16
-        }}>
-          <div style={{ flex: 1 }}>Product Details</div>
-          <div style={{ width: 140, textAlign: 'center' }}>Current Stock</div>
-          <div style={{ width: 160, textAlign: 'center' }}>Add Quantity</div>
-          <div style={{ width: 140, textAlign: 'center' }}>Final Stock</div>
-        </div>
+        <div className="modern-card" style={{ padding: 0, overflow: 'hidden' }}>
+          <div style={{ 
+            display: 'flex', alignItems: 'center', gap: 16, 
+            padding: '20px 24px', background: 'rgba(255,255,255,0.02)', 
+            borderBottom: '1px solid var(--border)',
+            fontSize: '11px', fontWeight: 900, color: 'var(--text-3)', 
+            textTransform: 'uppercase', letterSpacing: '1px'
+          }}>
+            <div style={{ flex: 1 }}>Entity Description</div>
+            <div style={{ width: 140, textAlign: 'center' }}>Current Assets</div>
+            <div style={{ width: 160, textAlign: 'center' }}>Inflow Quantity</div>
+            <div style={{ width: 140, textAlign: 'center' }}>Projected Stock</div>
+          </div>
 
-        {/* Data Rows */}
-        <div style={{ flex: 1, overflowY: 'auto' }}>
-          {filteredProducts.length === 0 ? (
-             <div style={{ textAlign: 'center', padding: '80px 0', color: 'var(--text-4)' }}>
-              <Box size={48} style={{ opacity: 0.4, marginBottom: 16 }} />
-              <div style={{ fontSize: 15 }}>No products found.</div>
-            </div>
-          ) : (
-            filteredProducts.map(p => {
-              const addedQty = Number(updates[p.id] || 0);
-              const finalQty = p.quantity + addedQty;
-              const isUpdated = addedQty !== 0;
-
-              return (
-                <div key={p.id} style={{
-                  display: 'flex', alignItems: 'center', gap: 16,
-                  padding: '14px 24px', borderBottom: '1px solid var(--border)',
-                  background: isUpdated ? 'var(--primary-light)' : 'transparent',
-                  transition: 'background .15s'
-                }}>
-                  {/* Product Details */}
-                  <div style={{ flex: 1 }}>
-                    <div style={{ fontWeight: 600, color: 'var(--text-1)', fontSize: 14 }}>
-                      {p.name}
-                      {p.product_type === 'loose' && <span style={{ color: '#6366f1', fontWeight: 700, fontSize: 12, marginLeft: 6 }}>(Loose)</span>}
+          <div style={{ maxHeight: '60vh', overflowY: 'auto' }}>
+            {filteredProducts.length === 0 ? (
+              <div style={{ padding: '60px', textAlign: 'center', color: 'var(--text-3)' }}>
+                <Box size={48} style={{ opacity: 0.2, marginBottom: 16 }} />
+                <p>No entities found matching your search.</p>
+              </div>
+            ) : (
+              filteredProducts.map(p => {
+                const isUpdated = updates[p.id] && Number(updates[p.id]) !== 0;
+                const finalQty = (Number(p.quantity) + Number(updates[p.id] || 0)).toFixed(2).replace(/\.00$/, '');
+                return (
+                  <div key={p.id} style={{
+                    display: 'flex', alignItems: 'center', gap: 16,
+                    padding: '16px 24px', borderBottom: '1px solid var(--border)',
+                    background: isUpdated ? 'rgba(99, 102, 241, 0.05)' : 'transparent',
+                    transition: 'all 0.2s cubic-bezier(0.4, 0, 0.2, 1)'
+                  }}>
+                    {/* Product Details */}
+                    <div style={{ flex: 1 }}>
+                      <div style={{ fontWeight: 700, color: isUpdated ? 'var(--primary)' : '#fff', fontSize: '15px' }}>
+                        {p.name}
+                      </div>
+                      <div style={{ fontSize: '12px', color: 'var(--text-3)', marginTop: '2px' }}>CODE: {p.barcode || 'N/A'} · ₹{p.price}</div>
                     </div>
-                    <div style={{ fontSize: 12, color: 'var(--text-3)', marginTop: 2 }}>Price: ₹{p.price}</div>
+                    
+                    {/* Current Stock */}
+                    <div style={{ width: 140, textAlign: 'center', fontWeight: 600, fontSize: '16px', color: 'var(--text-2)' }}>
+                      {p.quantity} <span style={{ fontSize: '12px', opacity: 0.6 }}>{p.unit}</span>
+                    </div>
+                    
+                    {/* Add Quantity Input */}
+                    <div style={{ width: 160, textAlign: 'center' }}>
+                      <input 
+                        type="number" 
+                        className="input-premium" 
+                        style={{ 
+                          width: '100%', maxWidth: 100, height: '40px', 
+                          textAlign: "center", fontWeight: 800, fontSize: '16px',
+                          borderColor: isUpdated ? 'var(--primary)' : 'rgba(255,255,255,0.1)',
+                          background: isUpdated ? 'rgba(99, 102, 241, 0.1)' : 'rgba(0,0,0,0.2)'
+                        }} 
+                        value={updates[p.id] || ""} 
+                        onChange={(e) => handleChange(p.id, e.target.value)}
+                        placeholder="+0"
+                      />
+                    </div>
+                    
+                    {/* Final Stock */}
+                    <div style={{ width: 140, textAlign: 'center' }}>
+                      <div style={{ 
+                        fontSize: '18px', 
+                        fontWeight: 900, 
+                        color: isUpdated ? 'var(--primary)' : '#fff' 
+                      }}>
+                        {finalQty} 
+                      </div>
+                      <div style={{ fontSize: '10px', fontWeight: 700, color: 'var(--text-3)', textTransform: 'uppercase' }}>{p.unit}</div>
+                    </div>
                   </div>
-                  
-                  {/* Current Stock */}
-                  <div style={{ width: 140, textAlign: 'center', fontWeight: 600, fontSize: 16, color: 'var(--text-2)' }}>
-                    {p.quantity} <span style={{ fontSize: 12, fontWeight: 500, color: 'var(--text-3)' }}>{p.unit}</span>
-                  </div>
-                  
-                  {/* Add Quantity Input */}
-                  <div style={{ width: 160, textAlign: 'center' }}>
-                    <input 
-                      type="number" 
-                      className="form-input" 
-                      style={{ 
-                        width: '100%', maxWidth: 120, height: 42, 
-                        textAlign: "center", fontWeight: 700, fontSize: 16,
-                        borderColor: isUpdated ? 'var(--primary)' : 'var(--border-2)',
-                        boxShadow: isUpdated ? '0 0 0 3px rgba(37,99,235,.1)' : 'none'
-                      }} 
-                      value={updates[p.id] || ""} 
-                      onChange={(e) => handleChange(p.id, e.target.value)}
-                      placeholder="+0"
-                    />
-                  </div>
-                  
-                  {/* Final Stock */}
-                  <div style={{ width: 140, textAlign: 'center' }}>
-                    <span style={{ 
-                      fontSize: 18, 
-                      fontWeight: 800, 
-                      color: isUpdated ? 'var(--primary)' : 'var(--text-1)' 
-                    }}>
-                      {finalQty} 
-                    </span>
-                    <span style={{ fontSize: 12, marginLeft: 4, fontWeight: 500, color: 'var(--text-3)' }}>{p.unit}</span>
-                  </div>
-                </div>
-              );
-            })
-          )}
+                );
+              })
+            )}
+          </div>
         </div>
+
+        {hasChanges && (
+          <div className="animate-up" style={{ marginTop: '24px', display: 'flex', justifyContent: 'flex-end' }}>
+             <div style={{ background: 'rgba(16, 185, 129, 0.1)', border: '1px solid rgba(16, 185, 129, 0.2)', padding: '12px 24px', borderRadius: '12px', color: '#10b981', fontSize: '13px', fontWeight: 700 }}>
+                ⚠️ You have unsaved inflow protocols. Commit changes to update inventory.
+             </div>
+          </div>
+        )}
       </div>
     </div>
   );
-}
+}

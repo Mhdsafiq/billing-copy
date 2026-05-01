@@ -103,7 +103,7 @@ export default function AIChatbot({ onClose }) {
         .ai-chat-panel {
           width: 560px;
           height: 680px;
-          background: linear-gradient(180deg, #0f172a 0%, #1e293b 100%);
+          background: #0f172a;
           border: 1px solid rgba(99,102,241,0.3);
           border-radius: 20px;
           box-shadow: 0 25px 60px rgba(0,0,0,0.8), 0 0 0 1px rgba(99,102,241,0.1), inset 0 1px 0 rgba(255,255,255,0.05);
@@ -117,14 +117,14 @@ export default function AIChatbot({ onClose }) {
           align-items: center;
           gap: 12px;
           padding: 16px 20px;
-          background: linear-gradient(135deg, rgba(99,102,241,0.15), rgba(139,92,246,0.1));
+          background: rgba(99,102,241,0.15);
           border-bottom: 1px solid rgba(99,102,241,0.2);
           flex-shrink: 0;
         }
         .ai-avatar {
           width: 40px;
           height: 40px;
-          background: linear-gradient(135deg, #6366f1, #8b5cf6);
+          background: #6366f1;
           border-radius: 12px;
           display: flex;
           align-items: center;
@@ -162,8 +162,8 @@ export default function AIChatbot({ onClose }) {
           width: 28px; height: 28px; border-radius: 8px; flex-shrink: 0;
           display: flex; align-items: center; justify-content: center; font-size: 13px;
         }
-        .ai-msg-icon.bot { background: linear-gradient(135deg, #6366f1, #8b5cf6); }
-        .ai-msg-icon.user { background: linear-gradient(135deg, #0ea5e9, #38bdf8); }
+        .ai-msg-icon.bot { background: #6366f1; }
+        .ai-msg-icon.user { background: #0ea5e9; }
         .ai-bubble {
           max-width: 78%;
           padding: 10px 14px;
@@ -180,7 +180,7 @@ export default function AIChatbot({ onClose }) {
           border-bottom-left-radius: 4px;
         }
         .ai-bubble.user {
-          background: linear-gradient(135deg, #6366f1, #8b5cf6);
+          background: #6366f1;
           color: white;
           border-bottom-right-radius: 4px;
         }
@@ -255,96 +255,75 @@ export default function AIChatbot({ onClose }) {
         .ai-input:focus { border-color: rgba(99,102,241,0.6); box-shadow: 0 0 0 3px rgba(99,102,241,0.1); }
         .ai-send-btn {
           width: 42px; height: 42px; border-radius: 12px; flex-shrink: 0;
-          background: linear-gradient(135deg, #6366f1, #8b5cf6);
+          background: #6366f1;
           border: none; cursor: pointer; color: white;
-          display: flex; align-items: center; justify-content: center;
-          transition: all 0.15s;
-          box-shadow: 0 4px 12px rgba(99,102,241,0.3);
+          transition: 0.2s;
         }
-        .ai-send-btn:hover { transform: scale(1.05); box-shadow: 0 6px 16px rgba(99,102,241,0.4); }
-        .ai-send-btn:disabled { opacity: 0.4; cursor: not-allowed; transform: none; }
+        .quick-prompt:hover {
+          background: var(--primary);
+          color: #fff;
+          transform: translateY(-2px);
+        }
+        @keyframes messagePop {
+          from { opacity: 0; transform: scale(0.95) translateY(10px); }
+          to { opacity: 1; transform: scale(1) translateY(0); }
+        }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+        @keyframes slideUp { from { transform: translateY(40px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
       `}</style>
 
       <div className="ai-chat-overlay" onClick={onClose}>
-        <div className="ai-chat-panel" onClick={(e) => e.stopPropagation()}>
-          {/* Header */}
-          <div className="ai-chat-header">
-            <div className="ai-avatar">🤖</div>
-            <div className="ai-header-info">
-              <div className="ai-header-name">AI Business Assistant</div>
-              <div className="ai-header-status">
-                <div className="ai-dot" />
-                Powered by Google Gemini · Live Data
-              </div>
+        <div className="ai-chat-window" onClick={(e) => e.stopPropagation()}>
+          <div className="chat-header">
+            <div>
+              <h2 className="text-gradient" style={{ margin: 0, fontSize: '28px', fontWeight: 900 }}>AI Core Assistant</h2>
+              <p style={{ color: 'var(--text-dim)', fontSize: '13px', marginTop: '4px', fontWeight: 700 }}>NEURAL ENGINE v4.2 · CONNECTED</p>
             </div>
-            <button className="ai-close-btn" onClick={onClose} title="Close">✕</button>
+            <button onClick={onClose} className="btn-outline" style={{ width: '48px', height: '48px', padding: 0, borderRadius: '50%' }}>✕</button>
           </div>
 
-          {/* Messages */}
-          <div className="ai-messages">
+          <div className="chat-messages">
             {messages.map((msg, i) => (
-              <div key={i} className={`ai-msg-row ${msg.role}`}>
-                <div className={`ai-msg-icon ${msg.role}`}>
-                  {msg.role === "bot" ? "🤖" : "👤"}
-                </div>
-                <div>
-                  <div className={`ai-bubble ${msg.role}`}>{msg.text}</div>
-                  <div className="ai-msg-time">{msg.time}</div>
-                </div>
+              <div key={i} className={`message-bubble ${msg.role === "bot" ? "bot-bubble" : "user-bubble"}`}>
+                <div style={{ whiteSpace: "pre-wrap", fontWeight: msg.role === 'user' ? 600 : 500 }}>{msg.text}</div>
+                <div style={{ fontSize: "10px", opacity: 0.6, marginTop: "8px", textAlign: "right", fontWeight: 800 }}>{msg.time}</div>
               </div>
             ))}
-
             {loading && (
-              <div className="ai-msg-row bot">
-                <div className="ai-msg-icon bot">🤖</div>
-                <div className="ai-typing">
-                  <div className="ai-typing-dot" />
-                  <div className="ai-typing-dot" />
-                  <div className="ai-typing-dot" />
-                </div>
+              <div className="message-bubble bot-bubble" style={{ display: 'flex', gap: '8px' }}>
+                <div className="pulse" style={{ width: '8px', height: '8px', background: 'var(--primary)', borderRadius: '50%' }}></div>
+                <div className="pulse" style={{ width: '8px', height: '8px', background: 'var(--primary)', borderRadius: '50%', animationDelay: '0.2s' }}></div>
+                <div className="pulse" style={{ width: '8px', height: '8px', background: 'var(--primary)', borderRadius: '50%', animationDelay: '0.4s' }}></div>
               </div>
             )}
             <div ref={messagesEndRef} />
           </div>
 
-          {/* Quick Prompts */}
-          <div className="ai-quick-prompts">
-            {quickPrompts.map((p) => (
-              <button
-                key={p}
-                className="ai-quick-chip"
-                onClick={() => {
-                  setInput(p);
-                  inputRef.current?.focus();
-                }}
-              >
-                {p}
-              </button>
-            ))}
-          </div>
+          <div style={{ padding: '32px 40px', background: 'rgba(0,0,0,0.2)', borderTop: '1px solid var(--glass-border)' }}>
+            <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap', marginBottom: '24px' }}>
+              {quickPrompts.map(p => (
+                <div key={p} className="quick-prompt" onClick={() => { setInput(p); inputRef.current?.focus(); }}>{p}</div>
+              ))}
+            </div>
 
-          {/* Input */}
-          <div className="ai-input-row">
-            <input
-              ref={inputRef}
-              className="ai-input"
-              placeholder="Ask about sales, profit, stock, expiry... (Tamil or English)"
-              value={input}
-              onChange={(e) => setInput(e.target.value)}
-              onKeyDown={handleKey}
-              disabled={loading}
-            />
-            <button
-              className="ai-send-btn"
-              onClick={sendMessage}
-              disabled={!input.trim() || loading}
-              title="Send"
-            >
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                <line x1="22" y1="2" x2="11" y2="13" />
-                <polygon points="22 2 15 22 11 13 2 9 22 2" />
-              </svg>
-            </button>
+            <div style={{ position: 'relative' }}>
+              <textarea
+                ref={inputRef}
+                className="input-premium"
+                style={{ width: '100%', height: '80px', padding: '20px 100px 20px 28px', fontSize: '16px', resize: 'none', background: 'rgba(255,255,255,0.03)', borderRadius: '20px' }}
+                placeholder="Ask your query here..."
+                value={input}
+                onChange={e => setInput(e.target.value)}
+                onKeyDown={handleKey}
+              />
+              <button 
+                onClick={sendMessage} 
+                className="btn-primary" 
+                style={{ position: 'absolute', right: '12px', bottom: '12px', height: '56px', padding: '0 24px', borderRadius: '14px' }}
+              >
+                SEND ➔
+              </button>
+            </div>
           </div>
         </div>
       </div>

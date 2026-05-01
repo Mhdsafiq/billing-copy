@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef } from "react";
+import { Trash2 } from "lucide-react";
 
 /* ── Autocomplete Input Component ── */
 function AutocompleteProduct({ products, selectedId, onSelect, placeholder }) {
@@ -6,7 +7,6 @@ function AutocompleteProduct({ products, selectedId, onSelect, placeholder }) {
   const [open, setOpen] = useState(false);
   const wrapperRef = useRef(null);
 
-  // Sync display text when selectedId changes (e.g. on edit)
   useEffect(() => {
     if (selectedId) {
       const p = products.find(pr => pr.id === Number(selectedId));
@@ -16,7 +16,6 @@ function AutocompleteProduct({ products, selectedId, onSelect, placeholder }) {
     }
   }, [selectedId, products]);
 
-  // Close dropdown on outside click
   useEffect(() => {
     const handler = (e) => {
       if (wrapperRef.current && !wrapperRef.current.contains(e.target)) {
@@ -35,64 +34,57 @@ function AutocompleteProduct({ products, selectedId, onSelect, placeholder }) {
     <div ref={wrapperRef} style={{ position: "relative" }}>
       <input
         type="text"
-        className="form-input"
-        placeholder={placeholder || "Type to search..."}
+        className="input-premium"
+        placeholder={placeholder || "Search products for campaign..."}
         value={query}
         onChange={(e) => {
           setQuery(e.target.value);
           setOpen(true);
-          // Clear selection if user edits text
           onSelect("");
         }}
         onFocus={() => setOpen(true)}
+        style={{
+          width: "100%", padding: "14px 16px", borderRadius: "12px", 
+          border: "1px solid rgba(255,255,255,0.1)", background: "rgba(0,0,0,0.2)", 
+          color: "white", fontSize: "14px"
+        }}
       />
       {open && filtered.length > 0 && (
-        <div style={{
-          position: "absolute", top: "100%", left: 0, right: 0,
-          background: "white", border: "1px solid var(--border)",
-          borderRadius: 8, marginTop: 4, zIndex: 9999,
-          maxHeight: 200, overflowY: "auto",
-          boxShadow: "0 8px 24px rgba(0,0,0,0.12)"
+        <div className="glass-panel animate-up" style={{
+          position: "absolute", top: "110%", left: 0, right: 0,
+          background: "rgba(15, 23, 42, 0.95)", border: "1px solid var(--border)",
+          borderRadius: 16, zIndex: 10000,
+          maxHeight: 250, overflowY: "auto",
+          padding: '8px', backdropFilter: 'blur(20px)',
+          boxShadow: "0 20px 50px rgba(0,0,0,0.5)"
         }}>
           {filtered.map(p => (
             <div
               key={p.id}
               style={{
-                padding: "9px 14px", fontSize: 13, cursor: "pointer",
-                borderBottom: "1px solid #f1f5f9",
+                padding: "12px 16px", borderRadius: '10px', fontSize: 14, cursor: "pointer",
                 display: "flex", justifyContent: "space-between", alignItems: "center",
+                transition: '0.2s'
               }}
               onMouseDown={(e) => {
-                e.preventDefault(); // prevent blur before click registers
+                e.preventDefault();
                 setQuery(p.name);
                 onSelect(p.id);
                 setOpen(false);
               }}
-              onMouseOver={(e) => e.currentTarget.style.background = "#f8fafc"}
-              onMouseOut={(e) => e.currentTarget.style.background = "white"}
+              onMouseEnter={(e) => e.currentTarget.style.background = "var(--primary-glow)"}
+              onMouseLeave={(e) => e.currentTarget.style.background = "transparent"}
             >
-              <span style={{ fontWeight: 600, color: "#1e293b" }}>{p.name}</span>
-              <span style={{ fontSize: 11, color: "#94a3b8", fontWeight: 500 }}>Stock: {p.quantity} {p.unit}</span>
+              <span style={{ fontWeight: 700, color: "#fff" }}>{p.name}</span>
+              <span style={{ fontSize: 11, color: "var(--text-3)", fontWeight: 800 }}>STOCK: {p.quantity}</span>
             </div>
           ))}
-        </div>
-      )}
-      {open && query && filtered.length === 0 && (
-        <div style={{
-          position: "absolute", top: "100%", left: 0, right: 0,
-          background: "white", border: "1px solid var(--border)",
-          borderRadius: 8, marginTop: 4, zIndex: 9999,
-          padding: "14px", textAlign: "center", color: "#94a3b8", fontSize: 13,
-          boxShadow: "0 8px 24px rgba(0,0,0,0.12)"
-        }}>
-          No products matching "{query}"
         </div>
       )}
     </div>
   );
 }
 
-/* ── Main Offers Component ── */
 const Offers = () => {
   const [offers, setOffers] = useState([]);
   const [products, setProducts] = useState([]);
@@ -100,11 +92,14 @@ const Offers = () => {
   const [formData, setFormData] = useState({
     id: null,
     name: "",
-    status: 1,
+    type: "BuyXGetY",
     buy_product_id: "",
-    buy_quantity: 1,
-    free_product_id: "",
-    free_quantity: 1,
+    buy_qty: 1,
+    get_product_id: "",
+    get_qty: 1,
+    min_bill_amount: 0,
+    discount_percent: 0,
+    active: true,
   });
   const [isEditing, setIsEditing] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
@@ -215,114 +210,120 @@ const Offers = () => {
   };
 
   return (
-    <div className="admin-scroll-area">
+    <div className="animate-fade" style={{ padding: '40px', height: '100%', overflowY: 'auto' }}>
+      <div style={{ maxWidth: '1200px', margin: '0 auto' }}>
+      
       {/* ── Modal ── */}
       {showModal && (
-        <div className="modal-overlay" onClick={() => setShowModal(false)}>
-          <div className="invoice-modal" style={{ maxWidth: 520 }} onClick={e => e.stopPropagation()}>
-            <h2 style={{ marginBottom: 20, color: "#0f172a" }}>
-              {isEditing ? "Edit Offer" : "Create New Offer"}
+        <div className="modal-overlay" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }} onClick={() => setShowModal(false)}>
+          <div className="modern-card animate-up" style={{ maxWidth: 520, width: '100%', padding: '32px' }} onClick={e => e.stopPropagation()}>
+            <h2 className="text-gradient" style={{ marginBottom: 24, fontSize: '24px', fontWeight: 900 }}>
+              {isEditing ? "Edit Promotion" : "Create New Promotion"}
             </h2>
 
             <form onSubmit={handleSubmit}>
               {/* Buy Condition */}
-              <div style={{ background: "#f8fafc", borderRadius: 10, padding: 16, marginBottom: 16, border: "1px solid #e2e8f0" }}>
-                <div style={{ fontWeight: 700, fontSize: 13, color: "#334155", marginBottom: 12 }}>🛒 Condition (Buy)</div>
-                <div style={{ display: "grid", gridTemplateColumns: "1fr 100px", gap: 12 }}>
-                  <div className="form-group">
-                    <label className="form-label">Select Product</label>
+              <div style={{ background: "rgba(255,255,255,0.03)", borderRadius: 16, padding: 20, marginBottom: 20, border: "1px solid var(--border)" }}>
+                <div style={{ fontWeight: 800, fontSize: 14, color: "var(--primary)", marginBottom: 16, letterSpacing: '0.5px' }}>🛒 CONDITION (BUY)</div>
+                <div style={{ display: "grid", gridTemplateColumns: "1fr 100px", gap: 16 }}>
+                  <div>
+                    <label style={{ display: 'block', fontSize: 11, fontWeight: 800, color: 'var(--text-3)', marginBottom: 8, textTransform: 'uppercase' }}>Select Product</label>
                     <AutocompleteProduct
                       products={products}
                       selectedId={formData.buy_product_id}
                       onSelect={(id) => setFormData(prev => ({ ...prev, buy_product_id: id }))}
-                      placeholder="Type to search product..."
+                      placeholder="Search base product..."
                     />
                   </div>
-                  <div className="form-group">
-                    <label className="form-label">Req. Qty</label>
+                  <div>
+                    <label style={{ display: 'block', fontSize: 11, fontWeight: 800, color: 'var(--text-3)', marginBottom: 8, textTransform: 'uppercase' }}>Req. Qty</label>
                     <input
                       type="number"
-                      className="form-input"
+                      className="input-premium"
                       min="1"
                       value={formData.buy_quantity}
                       onChange={e => setFormData(prev => ({ ...prev, buy_quantity: e.target.value }))}
                       required
+                      style={{ width: "100%", padding: "14px", borderRadius: "12px", border: "1px solid rgba(255,255,255,0.1)", background: "rgba(0,0,0,0.2)", color: "white", fontSize: "16px", textAlign: 'center', fontWeight: 800 }}
                     />
                   </div>
                 </div>
               </div>
 
               {/* Reward */}
-              <div style={{ background: "#eff6ff", borderRadius: 10, padding: 16, marginBottom: 20, border: "1px solid #dbeafe", position: "relative" }}>
+              <div style={{ background: "rgba(16, 185, 129, 0.05)", borderRadius: 16, padding: 20, marginBottom: 24, border: "1px solid rgba(16, 185, 129, 0.2)", position: "relative" }}>
                 <div style={{
-                  position: "absolute", top: -10, right: 14,
-                  background: "linear-gradient(135deg, #10b981, #059669)",
-                  color: "white", fontSize: 10, fontWeight: 800,
-                  padding: "3px 10px", borderRadius: 4,
-                  boxShadow: "0 2px 6px rgba(16, 185, 129, 0.3)"
+                  position: "absolute", top: -12, right: 20,
+                  background: "#10b981",
+                  color: "white", fontSize: 11, fontWeight: 900,
+                  padding: "4px 12px", borderRadius: 8, letterSpacing: '1px',
+                  boxShadow: "0 4px 12px rgba(16, 185, 129, 0.4)"
                 }}>REWARD</div>
-                <div style={{ fontWeight: 700, fontSize: 13, color: "#334155", marginBottom: 12 }}>🎁 Reward (Get Free)</div>
-                <div style={{ display: "grid", gridTemplateColumns: "1fr 100px", gap: 12 }}>
-                  <div className="form-group">
-                    <label className="form-label">Select Free Product</label>
+                <div style={{ fontWeight: 800, fontSize: 14, color: "#10b981", marginBottom: 16, letterSpacing: '0.5px' }}>🎁 REWARD (GET FREE)</div>
+                <div style={{ display: "grid", gridTemplateColumns: "1fr 100px", gap: 16 }}>
+                  <div>
+                    <label style={{ display: 'block', fontSize: 11, fontWeight: 800, color: 'var(--text-3)', marginBottom: 8, textTransform: 'uppercase' }}>Select Free Product</label>
                     <AutocompleteProduct
                       products={products}
                       selectedId={formData.free_product_id}
                       onSelect={(id) => setFormData(prev => ({ ...prev, free_product_id: id }))}
-                      placeholder="Type to search free item..."
+                      placeholder="Search free item..."
                     />
                   </div>
-                  <div className="form-group">
-                    <label className="form-label">Free Qty</label>
+                  <div>
+                    <label style={{ display: 'block', fontSize: 11, fontWeight: 800, color: 'var(--text-3)', marginBottom: 8, textTransform: 'uppercase' }}>Free Qty</label>
                     <input
                       type="number"
-                      className="form-input"
+                      className="input-premium"
                       min="1"
                       value={formData.free_quantity}
                       onChange={e => setFormData(prev => ({ ...prev, free_quantity: e.target.value }))}
                       required
+                      style={{ width: "100%", padding: "14px", borderRadius: "12px", border: "1px solid rgba(16,185,129,0.2)", background: "rgba(16,185,129,0.1)", color: "#10b981", fontSize: "16px", textAlign: 'center', fontWeight: 800 }}
                     />
                   </div>
                 </div>
               </div>
 
-              <div style={{ display: "flex", justifyContent: "flex-end", gap: 12, marginTop: 10 }}>
-                <button type="button" className="btn-outline" onClick={() => setShowModal(false)}>Cancel</button>
-                <button type="submit" className="btn-action">{isEditing ? "Update Offer" : "Create Offer"}</button>
+              <div style={{ display: "flex", justifyContent: "flex-end", gap: 16, marginTop: 32 }}>
+                <button type="button" className="btn-outline" style={{ padding: '14px 28px' }} onClick={() => setShowModal(false)}>Cancel</button>
+                <button type="submit" className="btn-primary" style={{ padding: '14px 28px', fontWeight: 800 }}>{isEditing ? "Update Promotion" : "Create Promotion"}</button>
               </div>
             </form>
           </div>
         </div>
       )}
 
-      {/* ── Main Card ── */}
-      <div className="admin-card" style={{ maxWidth: "100%" }}>
-        <div className="admin-card-header" style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-          <span>Offers & Promotions ({offers.length})</span>
-          <div style={{ display: 'flex', gap: 10, alignItems: 'center' }}>
-            <input
-              type="text"
-              placeholder="Search offers..."
-              value={searchQuery}
-              onChange={e => setSearchQuery(e.target.value)}
-              style={{ padding: '6px 12px', borderRadius: '4px', border: '1px solid var(--border)', fontSize: '13px', width: '200px' }}
-            />
-            <button className="btn-action" onClick={() => { resetForm(); setShowModal(true); }}>+ New Offer</button>
-          </div>
+      <header style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', marginBottom: '40px', flexWrap: 'wrap', gap: '20px' }}>
+        <div>
+          <h1 className="text-gradient" style={{ margin: 0, fontSize: '36px', fontWeight: 950, letterSpacing: '-0.04em' }}>Offers & Promotions</h1>
+          <p style={{ color: 'var(--text-3)', fontSize: '15px', marginTop: '4px', fontWeight: 500 }}>Manage active campaigns and BOGO rules ({offers.length})</p>
         </div>
+        <div style={{ display: 'flex', gap: 16, alignItems: 'center' }}>
+          <input
+            type="text"
+            className="input-premium"
+            placeholder="Search offers..."
+            value={searchQuery}
+            onChange={e => setSearchQuery(e.target.value)}
+            style={{ padding: '12px 20px', borderRadius: '12px', fontSize: '14px', width: '250px' }}
+          />
+          <button className="btn-primary" style={{ padding: '12px 24px', fontWeight: 800 }} onClick={() => { resetForm(); setShowModal(true); }}>+ NEW PROMOTION</button>
+        </div>
+      </header>
 
-        <div className="admin-card-body" style={{ padding: 0 }}>
-          <table className="data-table">
+      {/* ── Main Card ── */}
+      <div className="modern-card" style={{ padding: 0, overflow: 'hidden' }}>
+        <div style={{ overflowX: 'auto' }}>
+          <table className="data-table" style={{ width: '100%', minWidth: '800px', borderCollapse: 'collapse' }}>
             <thead>
-              <tr>
-                <th style={{ paddingLeft: 25 }}>#</th>
-                <th>Offer Name</th>
-                <th>Buy Product</th>
-                <th style={{ textAlign: "center" }}>Buy Qty</th>
-                <th>Free Product</th>
-                <th style={{ textAlign: "center" }}>Free Qty</th>
-                <th style={{ textAlign: "center" }}>Status</th>
-                <th style={{ textAlign: "right", paddingRight: 25 }}>Actions</th>
+              <tr style={{ background: 'rgba(255,255,255,0.02)', borderBottom: '1px solid var(--border)' }}>
+                <th style={{ padding: '16px 24px', textAlign: 'left', fontSize: 11, color: 'var(--text-3)', fontWeight: 800, textTransform: 'uppercase', letterSpacing: 1 }}>#</th>
+                <th style={{ padding: '16px 24px', textAlign: 'left', fontSize: 11, color: 'var(--text-3)', fontWeight: 800, textTransform: 'uppercase', letterSpacing: 1 }}>Offer Name</th>
+                <th style={{ padding: '16px 24px', textAlign: 'left', fontSize: 11, color: 'var(--text-3)', fontWeight: 800, textTransform: 'uppercase', letterSpacing: 1 }}>Buy Condition</th>
+                <th style={{ padding: '16px 24px', textAlign: 'left', fontSize: 11, color: 'var(--text-3)', fontWeight: 800, textTransform: 'uppercase', letterSpacing: 1 }}>Reward</th>
+                <th style={{ padding: '16px 24px', textAlign: 'center', fontSize: 11, color: 'var(--text-3)', fontWeight: 800, textTransform: 'uppercase', letterSpacing: 1 }}>Status</th>
+                <th style={{ padding: '16px 24px', textAlign: 'right', fontSize: 11, color: 'var(--text-3)', fontWeight: 800, textTransform: 'uppercase', letterSpacing: 1 }}>Actions</th>
               </tr>
             </thead>
             <tbody>
@@ -335,51 +336,57 @@ const Offers = () => {
                 );
                 return filtered.length === 0 ? (
                   <tr>
-                    <td colSpan="8" style={{ textAlign: "center", padding: 50, color: "#94a3b8" }}>
-                      {offers.length === 0 ? 'No offers defined yet. Click "+ New Offer" to create a promotion.' : `No offers matching "${searchQuery}"`}
+                    <td colSpan="6" style={{ textAlign: "center", padding: '60px', color: "var(--text-3)" }}>
+                      {offers.length === 0 ? 'No promotional campaigns active. Click "+ NEW PROMOTION" to create one.' : `No offers matching "${searchQuery}"`}
                     </td>
                   </tr>
                 ) : (
                   filtered.map((offer, idx) => (
-                  <tr key={offer.id} style={{ opacity: offer.status ? 1 : 0.55 }}>
-                    <td style={{ paddingLeft: 25, fontWeight: 800, color: "#0284c7" }}>{idx + 1}</td>
-                    <td style={{ fontWeight: 600 }}>{offer.name}</td>
-                    <td>{offer.buy_product_name || "—"}</td>
-                    <td style={{ textAlign: "center" }}>
-                      <span style={{
-                        background: "#e0e7ff", color: "#4338ca",
-                        padding: "2px 10px", borderRadius: 4,
-                        fontSize: 12, fontWeight: 800
-                      }}>{offer.buy_quantity}</span>
+                  <tr key={offer.id} style={{ opacity: offer.status ? 1 : 0.55, borderBottom: '1px solid var(--border)', transition: 'background 0.2s', ':hover': { background: 'rgba(255,255,255,0.02)' } }}>
+                    <td style={{ padding: '16px 24px', fontWeight: 800, color: "var(--text-3)", fontSize: 13 }}>{idx + 1}</td>
+                    <td style={{ padding: '16px 24px', fontWeight: 700, color: "white", fontSize: 14 }}>{offer.name}</td>
+                    
+                    <td style={{ padding: '16px 24px' }}>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                        <span style={{
+                          background: "rgba(99, 102, 241, 0.1)", color: "var(--primary)", border: "1px solid rgba(99, 102, 241, 0.2)",
+                          padding: "4px 10px", borderRadius: 8, fontSize: 13, fontWeight: 800
+                        }}>{offer.buy_quantity}x</span>
+                        <span style={{ fontSize: 13, color: 'var(--text-2)' }}>{offer.buy_product_name || "—"}</span>
+                      </div>
                     </td>
-                    <td>{offer.free_product_name || "—"}</td>
-                    <td style={{ textAlign: "center" }}>
-                      <span style={{
-                        background: "#dcfce7", color: "#16a34a",
-                        padding: "2px 10px", borderRadius: 4,
-                        fontSize: 12, fontWeight: 800
-                      }}>{offer.free_quantity}</span>
-                      <span style={{
-                        marginLeft: 6, background: "linear-gradient(135deg, #10b981, #059669)",
-                        color: "white", padding: "2px 8px", borderRadius: 4,
-                        fontSize: 10, fontWeight: 700
-                      }}>FREE</span>
+                    
+                    <td style={{ padding: '16px 24px' }}>
+                       <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                        <span style={{
+                          background: "rgba(16, 185, 129, 0.1)", color: "#10b981", border: "1px solid rgba(16, 185, 129, 0.2)",
+                          padding: "4px 10px", borderRadius: 8, fontSize: 13, fontWeight: 800
+                        }}>{offer.free_quantity}x</span>
+                        <span style={{ fontSize: 13, color: 'var(--text-2)' }}>{offer.free_product_name || "—"}</span>
+                        <span style={{
+                          marginLeft: 6, background: "#10b981",
+                          color: "white", padding: "2px 6px", borderRadius: 4,
+                          fontSize: 9, fontWeight: 900, letterSpacing: 0.5
+                        }}>FREE</span>
+                      </div>
                     </td>
-                    <td style={{ textAlign: "center" }}>
+                    
+                    <td style={{ padding: '16px 24px', textAlign: "center" }}>
                       <button
                         onClick={() => toggleStatus(offer)}
                         style={{
-                          border: "none", cursor: "pointer",
-                          padding: "4px 14px", borderRadius: 20,
-                          fontSize: 12, fontWeight: 700,
-                          background: offer.status ? "#dcfce7" : "#f1f5f9",
-                          color: offer.status ? "#16a34a" : "#94a3b8",
+                          border: offer.status ? "1px solid rgba(16, 185, 129, 0.3)" : "1px solid var(--border)", cursor: "pointer",
+                          padding: "6px 16px", borderRadius: 20,
+                          fontSize: 11, fontWeight: 800, letterSpacing: 1,
+                          background: offer.status ? "rgba(16, 185, 129, 0.1)" : "rgba(255,255,255,0.05)",
+                          color: offer.status ? "#10b981" : "var(--text-3)",
+                          transition: "0.2s"
                         }}
-                      >{offer.status ? "● ON" : "○ OFF"}</button>
+                      >{offer.status ? "ACTIVE" : "PAUSED"}</button>
                     </td>
-                    <td style={{ textAlign: "right", paddingRight: 25, display: "flex", gap: 10, justifyContent: "flex-end" }}>
-                      <button className="btn-outline" style={{ padding: "6px 12px", fontSize: "0.85rem" }} onClick={() => openEditModal(offer)}>Edit</button>
-                      <button className="btn-outline" style={{ padding: "6px 12px", fontSize: "0.85rem", color: "#dc2626", borderColor: "#fecaca", background: "#fef2f2" }} onClick={() => handleDelete(offer.id)}>Delete</button>
+                    <td style={{ padding: '16px 24px', textAlign: "right", display: "flex", gap: 12, justifyContent: "flex-end", alignItems: "center" }}>
+                      <button className="btn-outline" style={{ padding: "6px 16px", fontSize: "13px", borderRadius: 8 }} onClick={() => openEditModal(offer)}>Edit</button>
+                      <button className="btn-outline" style={{ padding: "6px 16px", fontSize: "13px", borderRadius: 8, color: "#ef4444", borderColor: "rgba(239, 68, 68, 0.3)", background: "rgba(239, 68, 68, 0.1)" }} onClick={() => handleDelete(offer.id)}>Delete</button>
                     </td>
                   </tr>
                 ))
@@ -388,6 +395,7 @@ const Offers = () => {
             </tbody>
           </table>
         </div>
+      </div>
       </div>
     </div>
   );

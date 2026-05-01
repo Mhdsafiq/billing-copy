@@ -25,13 +25,13 @@ function SettingRow({ label, children, hint }) {
   return (
     <div style={{
       display: "flex", alignItems: "center", justifyContent: "space-between",
-      padding: "16px 0", borderBottom: "1px solid var(--border)", gap: 20
+      padding: "24px 0", borderBottom: "1px solid var(--glass-border)", gap: 40
     }}>
       <div style={{ flex: 1 }}>
-        <div style={{ fontSize: 13.5, fontWeight: 600, color: "var(--text-1)" }}>{label}</div>
-        {hint && <div style={{ fontSize: 10.5, color: "var(--text-4)", marginTop: 2 }}>{hint}</div>}
+        <div style={{ fontSize: 16, fontWeight: 700, color: "#fff" }}>{label}</div>
+        {hint && <div style={{ fontSize: 12, color: "var(--text-dim)", marginTop: 4, lineHeight: 1.5 }}>{hint}</div>}
       </div>
-      <div style={{ flexShrink: 0, minWidth: 200 }}>{children}</div>
+      <div style={{ flexShrink: 0, minWidth: 300 }}>{children}</div>
     </div>
   );
 }
@@ -39,12 +39,12 @@ function SettingRow({ label, children, hint }) {
 function SectionTitle({ icon, title }) {
   return (
     <div style={{
-      display: "flex", alignItems: "center", gap: 8,
-      padding: "16px 0 8px", borderBottom: "2px solid var(--primary)",
-      marginBottom: 4, marginTop: 20
+      display: "flex", alignItems: "center", gap: 12,
+      padding: "24px 0 12px", borderBottom: "2px solid var(--primary-glow)",
+      marginBottom: 12, marginTop: 40
     }}>
-      <span style={{ fontSize: 18 }}>{icon}</span>
-      <span style={{ fontSize: 13, fontWeight: 800, color: "var(--primary)", letterSpacing: ".05em", textTransform: "uppercase" }}>{title}</span>
+      <span style={{ fontSize: 24 }}>{icon}</span>
+      <span style={{ fontSize: 14, fontWeight: 900, color: 'var(--primary)', letterSpacing: ".1em", textTransform: "uppercase" }}>{title}</span>
     </div>
   );
 }
@@ -319,12 +319,35 @@ export default function Settings() {
   };
 
   const inputStyle = {
-    height: 36, padding: "0 12px", borderRadius: 8,
-    border: "1px solid var(--border-2)",
-    background: "var(--surface-2)", color: "var(--text-1)",
-    fontSize: 13, width: "100%", outline: "none",
-    fontFamily: "inherit"
+    width: "100%",
+    padding: "14px 18px",
+    borderRadius: "14px",
+    border: "1px solid var(--glass-border)",
+    background: "rgba(0,0,0,0.2)",
+    color: "#fff",
+    fontSize: "15px",
+    fontWeight: "600",
+    transition: "0.2s cubic-bezier(0.16, 1, 0.3, 1)",
+    outline: "none",
   };
+
+  const actionBtnStyle = (color, loading) => ({
+    padding: "10px 24px",
+    borderRadius: "12px",
+    border: "none",
+    background: color,
+    color: "#fff",
+    fontSize: "13px",
+    fontWeight: "800",
+    cursor: loading ? "default" : "pointer",
+    opacity: loading ? 0.6 : 1,
+    transition: "0.2s",
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "center",
+    gap: "8px",
+    boxShadow: `0 4px 12px ${color}40`
+  });
 
   const numInputStyle = { ...inputStyle, width: 100 };
 
@@ -342,39 +365,26 @@ export default function Settings() {
     transition: "left 0.2s", boxShadow: "0 1px 3px rgba(0,0,0,0.2)"
   });
 
-  const actionBtnStyle = (color, isActive) => ({
-    height: 36, padding: "0 18px", borderRadius: 8,
-    border: "none", background: isActive ? "#16a34a" : color,
-    color: "#fff", fontSize: 12, fontWeight: 700, cursor: "pointer",
-    transition: "all .3s", opacity: isActive ? 0.8 : 1,
-    display: "inline-flex", alignItems: "center", gap: 6
-  });
-
   return (
-    <div style={{ height: "100%", display: "flex", flexDirection: "column", overflow: "hidden" }}>
-      <div style={{
-        display: "flex", alignItems: "center", justifyContent: "space-between",
-        marginBottom: 16, flexShrink: 0
-      }}>
-        <div>
-          <h2 style={{ fontSize: 18, fontWeight: 800, color: "var(--text-1)", margin: 0 }}>Settings</h2>
-          <div style={{ fontSize: 11.5, color: "var(--text-4)", marginTop: 3 }}>Configure your billing application</div>
-        </div>
-        <div>
-          <button onClick={save} style={{
-            height: 36, padding: "0 18px", borderRadius: 8,
-            border: "none", background: saved ? "#16a34a" : "var(--primary)",
-            color: "#fff", fontSize: 13, fontWeight: 700, cursor: "pointer",
-            transition: "background .3s"
-          }}>{saved ? "Saved" : "Save Changes"}</button>
-        </div>
-      </div>
-
-      <div style={{ flex: 1, overflowY: "auto", paddingRight: 10 }}>
+    <div className="animate-fade" style={{ padding: '40px', height: '100%', overflowY: 'auto' }}>
+      <div style={{ maxWidth: '1000px', margin: '0 auto' }}>
         
+        <header style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', marginBottom: '48px', gap: '24px' }}>
+          <div>
+            <h1 className="text-gradient" style={{ margin: 0, fontSize: '42px', fontWeight: 950, letterSpacing: '-0.04em' }}>System Parameters</h1>
+            <p style={{ color: 'var(--text-secondary)', fontSize: '16px', marginTop: '6px', fontWeight: 500 }}>Configure global operational protocols and business logic</p>
+          </div>
+          <button 
+            onClick={save} 
+            className="btn-primary pulse" 
+            style={{ padding: '16px 40px', fontSize: '16px', fontWeight: 900 }}
+          >
+            {saved ? "✓ PROTOCOL SAVED" : "COMMIT CHANGES ➔"}
+          </button>
+        </header>
 
-
-
+        <div className="modern-card" style={{ padding: '48px' }}>
+        
         {/* ── VALIDITY STATUS ── */}
         {validity && (
           <>
@@ -385,10 +395,10 @@ export default function Settings() {
               const isExpired = validity.daysLeft <= 0 || !validity.valid;
               const statusColor = isExpired ? "#ef4444" : isCritical ? "#ef4444" : isLow ? "#f59e0b" : "#10b981";
               const bgGrad = isExpired || isCritical
-                ? "linear-gradient(135deg, rgba(239,68,68,0.08), rgba(248,113,113,0.08))"
+                ? "rgba(239,68,68,0.08)"
                 : isLow
-                  ? "linear-gradient(135deg, rgba(245,158,11,0.08), rgba(251,191,36,0.08))"
-                  : "linear-gradient(135deg, rgba(16,185,129,0.08), rgba(52,211,153,0.08))";
+                  ? "rgba(245,158,11,0.08)"
+                  : "rgba(16,185,129,0.08)";
               const borderColor = isExpired || isCritical
                 ? "rgba(239,68,68,0.2)"
                 : isLow ? "rgba(245,158,11,0.2)" : "rgba(16,185,129,0.2)";
@@ -906,7 +916,7 @@ export default function Settings() {
 
 
         <div style={{
-          background: "linear-gradient(135deg, #0f172a, #1e293b)",
+          background: "#0f172a",
           border: "1px solid rgba(99,102,241,0.2)",
           borderRadius: 16, padding: "32px 24px", marginTop: 12, marginBottom: 40,
           textAlign: "center",
@@ -915,7 +925,7 @@ export default function Settings() {
           <div style={{ letterSpacing: "-.02em", marginBottom: 12, display: "flex", alignItems: "center", justifyContent: "center", gap: 10 }}>
             <span style={{ 
               fontSize: 28, fontWeight: 900, 
-              background: "linear-gradient(135deg, #818cf8, #c084fc)", 
+              background: "#818cf8", 
               WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" 
             }}>INNOAIVATORS</span>
           </div>
@@ -942,6 +952,7 @@ export default function Settings() {
           </div>
         </div>
 
+        </div>
       </div>
     </div>
   );

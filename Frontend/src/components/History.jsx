@@ -91,190 +91,160 @@ export default function History() {
 
   const grouped = groupInvoices(filteredInvoices);
 
-  const renderGroup = (label, bills) => {
-    if (bills.length === 0) return null;
-    return (
-      <div key={label} style={{ marginBottom: 8 }}>
-        <div style={{
-          padding: '10px 20px', background: 'var(--surface-2)',
-          fontWeight: 700, fontSize: 13, color: 'var(--text-3)',
-          textTransform: 'uppercase', letterSpacing: '.04em',
-          borderBottom: '1px solid var(--border)'
-        }}>{label} ({bills.length})</div>
-        {bills.map(inv => (
-          <div key={inv.id} style={{
-            display: 'flex', alignItems: 'center', gap: 16,
-            padding: '14px 20px', borderBottom: '1px solid var(--border)',
-            transition: 'background .15s'
-          }}
-          onMouseEnter={e => e.currentTarget.style.background = 'var(--surface-2)'}
-          onMouseLeave={e => e.currentTarget.style.background = ''}>
-            {/* Invoice ID */}
-            <div style={{ width: 70, fontWeight: 700, color: 'var(--primary)', fontSize: 14 }}>#{inv.bill_no || inv.id}</div>
-            {/* Date */}
-            <div style={{ width: 150, display: 'flex', alignItems: 'center', gap: 6, fontSize: 13, color: 'var(--text-2)' }}>
-              <Calendar size={14} color="var(--text-3)" />
-              {new Date(inv.created_at).toLocaleString('en-IN', { dateStyle: 'short', timeStyle: 'short' })}
-            </div>
-            {/* Customer */}
-            <div style={{ width: 160 }}>
-              <div style={{ fontWeight: 600, fontSize: 13 }}>{inv.customer_name || 'Walk-in'}</div>
-              {inv.customer_phone && <div style={{ fontSize: 11, color: 'var(--text-3)' }}>{inv.customer_phone}</div>}
-            </div>
-            {/* Products */}
-            <div style={{ flex: 1, fontSize: 13, color: 'var(--text-2)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }} title={inv.productsList}>
-              {inv.productsList || '-'}
-            </div>
-            {/* Total */}
-            <div style={{ width: 100, textAlign: 'right', fontWeight: 800, fontSize: 15 }}>
-              ₹{Number(inv.total_amount).toFixed(2)}
-            </div>
-            {/* Payment */}
-            <div style={{ width: 70 }}>
-              <span style={{
-                padding: '4px 10px', borderRadius: 12, fontSize: 11, fontWeight: 700,
-                background: inv.payment_mode === 'Cash' ? '#10b98120' : inv.payment_mode === 'UPI' ? '#8b5cf620' : '#3b82f620',
-                color: inv.payment_mode === 'Cash' ? '#10b981' : inv.payment_mode === 'UPI' ? '#8b5cf6' : '#3b82f6'
-              }}>{inv.payment_mode}</span>
-            </div>
-            {/* Actions */}
-            <div style={{ display: 'flex', gap: 6 }}>
-              <button onClick={() => handleViewBill(inv)} title="View Bill"
-                style={{ width: 32, height: 32, borderRadius: 8, border: '1px solid var(--border)', background: 'var(--surface)', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--primary)', transition: 'background .15s' }}
-                onMouseEnter={e => e.currentTarget.style.background = 'var(--primary-light)'}
-                onMouseLeave={e => e.currentTarget.style.background = 'var(--surface)'}>
-                <Eye size={15} />
-              </button>
-              <button onClick={() => handleDeleteBill(inv)} title="Delete Bill"
-                style={{ width: 32, height: 32, borderRadius: 8, border: '1px solid #dc262630', background: 'var(--surface)', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#dc2626', transition: 'background .15s' }}
-                onMouseEnter={e => e.currentTarget.style.background = '#fef2f2'}
-                onMouseLeave={e => e.currentTarget.style.background = 'var(--surface)'}>
-                <Trash2 size={15} />
-              </button>
-            </div>
-          </div>
-        ))}
-      </div>
-    );
-  };
-
   return (
-    <div style={{ maxWidth: 1200, margin: '0 auto', width: '100%', height: '100%', display: 'flex', flexDirection: 'column' }}>
-      <div className="page-title" style={{ display: 'flex', alignItems: 'center', gap: 10, flexWrap: 'wrap' }}>
-        <Receipt size={24} color="var(--primary)" />
-        Billing History
-
-        <div style={{ marginLeft: 'auto', display: 'flex', alignItems: 'center', gap: 10 }}>
-          {/* Date Range Filter */}
-          <div style={{ display: 'flex', alignItems: 'center', gap: 6, background: 'white', border: '1px solid var(--border)', borderRadius: 8, padding: '4px 10px' }}>
-            <span style={{ fontSize: 12, fontWeight: 600, color: 'var(--text-3)' }}>From</span>
-            <input type="date" value={dateFrom} onChange={e => setDateFrom(e.target.value)}
-              style={{ border: 'none', outline: 'none', fontSize: 12, fontFamily: 'inherit', colorScheme: 'light', padding: '4px', background: 'transparent' }} />
-            <span style={{ fontSize: 12, fontWeight: 600, color: 'var(--text-3)' }}>To</span>
-            <input type="date" value={dateTo} onChange={e => setDateTo(e.target.value)}
-              style={{ border: 'none', outline: 'none', fontSize: 12, fontFamily: 'inherit', colorScheme: 'light', padding: '4px', background: 'transparent' }} />
-            {(dateFrom || dateTo) && (
-              <button onClick={() => { setDateFrom(""); setDateTo(""); }}
-                style={{ background: '#ef444415', color: '#ef4444', border: '1px solid #ef444430', borderRadius: 4, padding: '2px 8px', fontSize: 11, fontWeight: 700, cursor: 'pointer' }}>Clear</button>
-            )}
+    <div className="animate-up" style={{ padding: '40px', height: '100%', overflowY: 'auto' }}>
+      <div style={{ maxWidth: '1400px', margin: '0 auto' }}>
+        
+        <header style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', marginBottom: '48px', flexWrap: 'wrap', gap: '24px' }}>
+          <div>
+            <h1 className="text-gradient" style={{ margin: 0, fontSize: '42px', fontWeight: 950, letterSpacing: '-0.04em' }}>Ledger Records</h1>
+            <p style={{ color: 'var(--text-secondary)', fontSize: '16px', marginTop: '6px', fontWeight: 500 }}>Audit and review all historical transaction protocols</p>
           </div>
-          <span style={{ fontSize: 13, fontWeight: 500, color: 'var(--text-3)' }}>
-            {filteredInvoices.length}{filteredInvoices.length !== invoices.length ? ` / ${invoices.length}` : ''} bills
-          </span>
-        </div>
-      </div>
 
-      <div className="modern-card" style={{ flex: 1, display: 'flex', flexDirection: 'column', padding: 0, overflow: 'hidden' }}>
-        <div style={{ flex: 1, overflowY: 'auto' }}>
+          <div style={{ display: 'flex', gap: '16px', alignItems: 'flex-end' }}>
+            <div>
+              <label style={{ display: 'block', fontSize: '10px', fontWeight: 900, color: 'var(--text-dim)', marginBottom: '8px', textTransform: 'uppercase' }}>Epoch Start</label>
+              <input type="date" className="input-premium" style={{ height: '48px' }} value={dateFrom} onChange={e => setDateFrom(e.target.value)} />
+            </div>
+            <div>
+              <label style={{ display: 'block', fontSize: '10px', fontWeight: 900, color: 'var(--text-dim)', marginBottom: '8px', textTransform: 'uppercase' }}>Epoch End</label>
+              <input type="date" className="input-premium" style={{ height: '48px' }} value={dateTo} onChange={e => setDateTo(e.target.value)} />
+            </div>
+            <div style={{ textAlign: 'right', marginLeft: '24px' }}>
+              <div style={{ fontSize: '32px', fontWeight: 950, color: 'var(--primary)', lineHeight: 1 }}>{filteredInvoices.length}</div>
+              <div style={{ fontSize: '11px', color: 'var(--text-dim)', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '1px' }}>Total Records</div>
+            </div>
+          </div>
+        </header>
+
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '40px' }}>
           {loading ? (
-            <div style={{ textAlign: 'center', padding: '60px 0', color: 'var(--text-3)' }}>Loading history...</div>
-          ) : invoices.length === 0 ? (
-            <div style={{ textAlign: 'center', padding: '80px 0', color: 'var(--text-4)' }}>
-              <FileText size={48} style={{ opacity: 0.4, marginBottom: 16 }} />
-              <div style={{ fontSize: 15 }}>No billing history available yet.</div>
-              <div style={{ fontSize: 13, marginTop: 6 }}>Bills will appear here after checkout.</div>
+            <div className="flex-center" style={{ height: '300px', flexDirection: 'column', gap: '16px' }}>
+              <div className="animate-spin" style={{ width: '40px', height: '40px', border: '4px solid var(--primary-glow)', borderTopColor: 'var(--primary)', borderRadius: '50%' }}></div>
+              <div style={{ color: 'var(--text-dim)', fontWeight: 600 }}>Retrieving Ledger...</div>
+            </div>
+          ) : filteredInvoices.length === 0 ? (
+            <div className="glass-panel flex-center" style={{ height: '300px', flexDirection: 'column', gap: '20px', opacity: 0.5 }}>
+              <FileText size={64} style={{ color: 'var(--text-dim)' }} />
+              <div style={{ textAlign: 'center' }}>
+                <div style={{ fontSize: '18px', fontWeight: 700 }}>No Transactions Found</div>
+                <div style={{ fontSize: '14px', color: 'var(--text-dim)' }}>Try adjusting your date filters</div>
+              </div>
             </div>
           ) : (
             <>
-              {renderGroup("Today", grouped.today)}
-              {renderGroup("This Week", grouped.thisWeek)}
-              {renderGroup("This Month", grouped.thisMonth)}
-              {renderGroup("Older", grouped.older)}
+              {Object.entries(grouped).map(([key, bills]) => {
+                if (bills.length === 0) return null;
+                const labels = { today: 'Today', thisWeek: 'This Week', thisMonth: 'This Month', older: 'Older Transactions' };
+                return (
+                  <div key={key} className="animate-fade">
+                    <h3 style={{ fontSize: '12px', fontWeight: 800, color: 'var(--primary)', textTransform: 'uppercase', letterSpacing: '2px', marginBottom: '20px', display: 'flex', alignItems: 'center', gap: '12px' }}>
+                      {labels[key]} <div style={{ flex: 1, height: '1px', background: 'var(--primary-glow)' }}></div>
+                    </h3>
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+                      {bills.map(inv => (
+                        <div key={inv.id} className="glass-panel hover-glow" style={{ display: 'flex', alignItems: 'center', padding: '20px 30px', cursor: 'pointer', transition: '0.3s' }} onClick={() => handleViewBill(inv)}>
+                          <div style={{ width: '80px' }}>
+                            <div style={{ fontSize: '10px', color: 'var(--text-dim)', fontWeight: 800 }}>INV #</div>
+                            <div style={{ fontSize: '16px', fontWeight: 900, color: 'var(--primary)' }}>{inv.bill_no || inv.id}</div>
+                          </div>
+                          
+                          <div style={{ width: '180px' }}>
+                            <div style={{ fontSize: '10px', color: 'var(--text-dim)', fontWeight: 800 }}>DATE & TIME</div>
+                            <div style={{ fontSize: '13px', fontWeight: 600 }}>{new Date(inv.created_at).toLocaleString('en-IN', { dateStyle: 'medium', timeStyle: 'short' })}</div>
+                          </div>
+
+                          <div style={{ flex: 1 }}>
+                            <div style={{ fontSize: '10px', color: 'var(--text-dim)', fontWeight: 800 }}>CUSTOMER</div>
+                            <div style={{ fontSize: '14px', fontWeight: 700 }}>{inv.customer_name || 'Walk-in Customer'}</div>
+                            {inv.customer_phone && <div style={{ fontSize: '11px', color: 'var(--text-muted)' }}>{inv.customer_phone}</div>}
+                          </div>
+
+                          <div style={{ width: '120px', textAlign: 'center' }}>
+                            <div style={{ fontSize: '10px', color: 'var(--text-dim)', fontWeight: 800, marginBottom: '4px' }}>PAYMENT</div>
+                            <span style={{ padding: '4px 12px', borderRadius: '8px', fontSize: '10px', fontWeight: 800, background: inv.payment_mode === 'Cash' ? 'rgba(16, 185, 129, 0.1)' : 'rgba(99, 102, 241, 0.1)', color: inv.payment_mode === 'Cash' ? 'var(--success)' : 'var(--primary)' }}>
+                              {inv.payment_mode.toUpperCase()}
+                            </span>
+                          </div>
+
+                          <div style={{ width: '150px', textAlign: 'right' }}>
+                            <div style={{ fontSize: '10px', color: 'var(--text-dim)', fontWeight: 800 }}>TOTAL AMOUNT</div>
+                            <div style={{ fontSize: '20px', fontWeight: 900, color: 'var(--text-main)' }}>₹{Number(inv.total_amount).toFixed(2)}</div>
+                          </div>
+
+                          <div style={{ marginLeft: '40px', display: 'flex', gap: '10px' }}>
+                            <button onClick={(e) => { e.stopPropagation(); handleViewBill(inv); }} className="btn-outline" style={{ width: '40px', height: '40px', padding: 0 }}><Eye size={18} /></button>
+                            <button onClick={(e) => { e.stopPropagation(); handleDeleteBill(inv); }} className="btn-outline" style={{ width: '40px', height: '40px', padding: 0, color: 'var(--danger)', borderColor: 'rgba(244, 63, 94, 0.2)' }}><Trash2 size={18} /></button>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                );
+              })}
             </>
           )}
         </div>
       </div>
 
-      {/* ── View Bill Modal ── */}
+      {/* ── DETAIL MODAL ── */}
       {viewInvoice && (
         <div className="modal-overlay" onClick={() => setViewInvoice(null)}>
-          <div className="modal-content" style={{ maxWidth: 520 }} onClick={e => e.stopPropagation()}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20 }}>
-              <h2 style={{ margin: 0 }}>Invoice #{viewInvoice.bill_no || viewInvoice.id}</h2>
-              <button onClick={() => setViewInvoice(null)} style={{ background: 'transparent', border: 'none', cursor: 'pointer' }}><X size={24} /></button>
+          <div className="glass-panel animate-fade" onClick={e => e.stopPropagation()} style={{ width: '600px', padding: '40px', maxHeight: '90vh', overflowY: 'auto' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '30px' }}>
+              <div>
+                <h2 className="text-gradient" style={{ margin: 0, fontSize: '24px', fontWeight: 900 }}>Invoice Detail</h2>
+                <div style={{ fontSize: '13px', color: 'var(--text-dim)', marginTop: '4px' }}>Transaction ID: {viewInvoice.id}</div>
+              </div>
+              <button onClick={() => setViewInvoice(null)} className="btn-outline" style={{ width: '40px', height: '40px', padding: 0 }}><X size={24} /></button>
             </div>
 
-            {/* Customer Info */}
-            <div style={{ display: 'flex', gap: 24, marginBottom: 20, padding: '12px 16px', background: 'var(--surface-2)', borderRadius: 10 }}>
-              <div>
-                <div style={{ fontSize: 11, color: 'var(--text-3)', textTransform: 'uppercase', fontWeight: 700 }}>Customer</div>
-                <div style={{ fontSize: 14, fontWeight: 600 }}>{viewInvoice.customer_name || 'Walk-in'}</div>
+            <div className="grid-2" style={{ gap: '20px', marginBottom: '30px' }}>
+              <div style={{ padding: '20px', background: 'rgba(255,255,255,0.02)', borderRadius: '16px', border: '1px solid var(--glass-border)' }}>
+                <div style={{ fontSize: '10px', color: 'var(--text-dim)', fontWeight: 800, textTransform: 'uppercase' }}>Customer Details</div>
+                <div style={{ fontSize: '16px', fontWeight: 700, marginTop: '8px' }}>{viewInvoice.customer_name || 'Walk-in'}</div>
+                <div style={{ fontSize: '13px', color: 'var(--text-muted)' }}>{viewInvoice.customer_phone || 'No phone provided'}</div>
               </div>
-              <div>
-                <div style={{ fontSize: 11, color: 'var(--text-3)', textTransform: 'uppercase', fontWeight: 700 }}>Phone</div>
-                <div style={{ fontSize: 14, fontWeight: 600 }}>{viewInvoice.customer_phone || '-'}</div>
-              </div>
-              <div>
-                <div style={{ fontSize: 11, color: 'var(--text-3)', textTransform: 'uppercase', fontWeight: 700 }}>Date</div>
-                <div style={{ fontSize: 14, fontWeight: 600 }}>{new Date(viewInvoice.created_at).toLocaleString('en-IN', { dateStyle: 'medium', timeStyle: 'short' })}</div>
+              <div style={{ padding: '20px', background: 'rgba(255,255,255,0.02)', borderRadius: '16px', border: '1px solid var(--glass-border)' }}>
+                <div style={{ fontSize: '10px', color: 'var(--text-dim)', fontWeight: 800, textTransform: 'uppercase' }}>Billing Info</div>
+                <div style={{ fontSize: '16px', fontWeight: 700, marginTop: '8px' }}>Bill #{viewInvoice.bill_no || viewInvoice.id}</div>
+                <div style={{ fontSize: '13px', color: 'var(--text-muted)' }}>{new Date(viewInvoice.created_at).toLocaleString()}</div>
               </div>
             </div>
 
-            {/* Items Table */}
-            {viewLoading ? (
-              <div style={{ textAlign: 'center', padding: '30px 0', color: 'var(--text-3)' }}>Loading items...</div>
-            ) : (
-              <table className="modern-table" style={{ width: '100%', marginBottom: 20 }}>
+            <div className="glass-panel" style={{ padding: '0', overflow: 'hidden', marginBottom: '30px' }}>
+              <table style={{ width: '100%', borderCollapse: 'collapse' }}>
                 <thead>
-                  <tr>
-                    <th>Product</th>
-                    <th style={{ textAlign: 'center' }}>Qty</th>
-                    <th style={{ textAlign: 'right' }}>Price</th>
-                    <th style={{ textAlign: 'right' }}>GST</th>
-                    <th style={{ textAlign: 'right' }}>Total</th>
+                  <tr style={{ background: 'rgba(255,255,255,0.03)', borderBottom: '1px solid var(--glass-border)' }}>
+                    <th style={{ textAlign: 'left', padding: '15px 20px', fontSize: '11px', color: 'var(--text-dim)' }}>PRODUCT</th>
+                    <th style={{ textAlign: 'center', padding: '15px 20px', fontSize: '11px', color: 'var(--text-dim)' }}>QTY</th>
+                    <th style={{ textAlign: 'right', padding: '15px 20px', fontSize: '11px', color: 'var(--text-dim)' }}>TOTAL</th>
                   </tr>
                 </thead>
                 <tbody>
-                  {viewItems.map((item, i) => {
-                    const lineTotal = (item.price * item.quantity) + (item.gst_amount || 0);
-                    return (
-                      <tr key={i}>
-                        <td style={{ fontWeight: 600 }}>{item.name}</td>
-                        <td style={{ textAlign: 'center' }}>{item.quantity}</td>
-                        <td style={{ textAlign: 'right' }}>₹{Number(item.price).toFixed(2)}</td>
-                        <td style={{ textAlign: 'right', fontSize: 12, color: 'var(--text-3)' }}>₹{Number(item.gst_amount || 0).toFixed(2)}</td>
-                        <td style={{ textAlign: 'right', fontWeight: 700 }}>₹{lineTotal.toFixed(2)}</td>
-                      </tr>
-                    );
-                  })}
+                  {viewItems.map((item, i) => (
+                    <tr key={i} style={{ borderBottom: '1px solid var(--glass-border)' }}>
+                      <td style={{ padding: '15px 20px' }}>
+                        <div style={{ fontWeight: 700, fontSize: '13px' }}>{item.name}</div>
+                        <div style={{ fontSize: '11px', color: 'var(--text-dim)' }}>₹{item.price} per unit</div>
+                      </td>
+                      <td style={{ textAlign: 'center', padding: '15px 20px', fontWeight: 600 }}>{item.quantity}</td>
+                      <td style={{ textAlign: 'right', padding: '15px 20px', fontWeight: 800 }}>₹{((item.price * item.quantity) + (item.gst_amount || 0)).toFixed(2)}</td>
+                    </tr>
+                  ))}
                 </tbody>
               </table>
-            )}
-
-            {/* Grand Total */}
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '14px 16px', background: 'var(--surface-2)', borderRadius: 10, marginBottom: 20 }}>
-              <div>
-                <span style={{ fontWeight: 700, fontSize: 16 }}>Grand Total</span>
-                <span style={{
-                  marginLeft: 12, padding: '3px 10px', borderRadius: 12, fontSize: 11, fontWeight: 700,
-                  background: viewInvoice.payment_mode === 'Cash' ? '#10b98120' : '#8b5cf620',
-                  color: viewInvoice.payment_mode === 'Cash' ? '#10b981' : '#8b5cf6'
-                }}>{viewInvoice.payment_mode}</span>
-              </div>
-              <span style={{ fontSize: 22, fontWeight: 800, color: 'var(--primary)' }}>₹{Number(viewInvoice.total_amount).toFixed(2)}</span>
             </div>
 
-            <button className="btn btn-outline" onClick={() => setViewInvoice(null)} style={{ width: '100%' }}>Close</button>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '24px 30px', background: 'var(--primary-glow)', borderRadius: '20px', border: '1px solid var(--primary)' }}>
+              <div>
+                <div style={{ fontSize: '12px', fontWeight: 800, color: 'var(--primary)', textTransform: 'uppercase' }}>Net Payable Amount</div>
+                <div style={{ fontSize: '11px', color: 'var(--text-dim)' }}>Paid via {viewInvoice.payment_mode}</div>
+              </div>
+              <div style={{ fontSize: '32px', fontWeight: 900, color: 'var(--text-main)' }}>₹{Number(viewInvoice.total_amount).toFixed(2)}</div>
+            </div>
+
+            <button onClick={() => setViewInvoice(null)} className="btn-primary" style={{ width: '100%', marginTop: '30px', padding: '16px' }}>CLOSE VIEW</button>
           </div>
         </div>
       )}

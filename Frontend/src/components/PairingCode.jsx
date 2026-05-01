@@ -40,7 +40,7 @@ export default function PairingCode({ shopId, onClose }) {
       background: "rgba(0,0,0,0.7)", backdropFilter: "blur(8px)",
     }} onClick={onClose}>
       <div style={{
-        background: "linear-gradient(135deg, #0f172a, #1e1b4b)",
+        background: "#0f172a",
         border: "1px solid rgba(99,102,241,0.25)", borderRadius: 24,
         padding: "40px", maxWidth: 420, width: "90%", textAlign: "center",
         boxShadow: "0 25px 60px rgba(0,0,0,0.5)",
@@ -50,8 +50,8 @@ export default function PairingCode({ shopId, onClose }) {
         <div style={{
           width: 56, height: 56, borderRadius: 16, margin: "0 auto 20px",
           background: status === "success"
-            ? "linear-gradient(135deg, #22c55e, #16a34a)"
-            : "linear-gradient(135deg, #6366f1, #8b5cf6)",
+            ? "#22c55e"
+            : "#6366f1",
           display: "flex", alignItems: "center", justifyContent: "center", fontSize: 24,
           boxShadow: status === "success"
             ? "0 8px 24px rgba(34,197,94,0.4)"
@@ -142,7 +142,7 @@ export default function PairingCode({ shopId, onClose }) {
               style={{
                 flex: 1, padding: "14px", borderRadius: 12, border: "none",
                 background: code.length === 6
-                  ? "linear-gradient(135deg, #6366f1, #8b5cf6)"
+                  ? "#6366f1"
                   : "rgba(99,102,241,0.2)",
                 color: "white", fontSize: 14, fontWeight: 700, cursor: "pointer",
                 transition: "all 0.2s",
@@ -156,7 +156,7 @@ export default function PairingCode({ shopId, onClose }) {
             onClick={onClose}
             style={{
               flex: status === "success" ? 1 : undefined, padding: "14px 20px", borderRadius: 12,
-              background: status === "success" ? "linear-gradient(135deg, #22c55e, #16a34a)" : "rgba(255,255,255,0.06)",
+              background: status === "success" ? "#22c55e" : "rgba(255,255,255,0.06)",
               border: status === "success" ? "none" : "1px solid rgba(255,255,255,0.1)",
               color: "white", fontSize: 14, fontWeight: 700, cursor: "pointer",
               transition: "all 0.2s",

@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from "react";
-import { Search, Camera, QrCode } from "lucide-react";
+import { Search, Camera, QrCode, RefreshCw, Trash2, ShoppingCart } from "lucide-react";
 import { Html5QrcodeScanner, Html5QrcodeSupportedFormats } from "html5-qrcode";
 
 /* ─────────────────── helpers ─────────────────────────── */
@@ -444,6 +444,12 @@ const POS = ({ showQR }) => {
   };
 
   /* ── Add Product from Grid ── */
+  // ── HELPERS ──
+  const isExpired = (p) => {
+    if (!p.expiry_date) return false;
+    return new Date(p.expiry_date) < new Date();
+  };
+
   const addProductToCart = (product) => {
     if (!product) return;
     if (isExpired(product)) {
@@ -675,7 +681,7 @@ const POS = ({ showQR }) => {
   };
 
   /* ── Product search ── */
-  const handleInputChange = (index, value) => {
+  const handleItemNameChange = (index, value) => {
     const safeValue = typeof value === "string" ? value : "";
     const updated = [...billItems];
     updated[index] = {
@@ -775,7 +781,7 @@ const POS = ({ showQR }) => {
     setSuggestions([]);
   };
 
-  const addNewRow = () => {
+  const addRow = () => {
     const newIdx = billItems.length;
     const newRow = emptyRow();
     setBillItems(prev => [...prev, newRow]);
@@ -816,7 +822,7 @@ const POS = ({ showQR }) => {
       }
     } else if (field === "qty" && e.key === "Enter") {
       e.preventDefault();
-      addNewRow();
+      addRow();
     } else if (e.key === "Escape") {
       setSuggestions([]);
     }
@@ -1002,62 +1008,64 @@ const POS = ({ showQR }) => {
   ══════════════════════════════════════════════════════ */
   if (!terminalActive) {
     return (
-      <div style={{
+      <div className="animate-fade" style={{
         height: "100%", display: "flex", flexDirection: "column",
         alignItems: "center", justifyContent: "center", 
-        background: "#ffffff", /* Simple minimal B&W background */
-        gap: 40, padding: 40
+        background: "transparent",
+        gap: 60, padding: 40
       }}>
         <div style={{ textAlign: "center" }}>
-          <h1 style={{ fontSize: 36, fontWeight: 900, color: "#2563eb", marginBottom: 10 }}>Select Billing Terminal</h1>
-          <p style={{ color: "var(--text-2)", fontSize: 18, fontWeight: 500 }}>Choose your preferred method to start billing</p>
+          <h1 className="text-gradient" style={{ fontSize: 52, fontWeight: 950, marginBottom: 12, letterSpacing: '-0.04em' }}>Select Intelligence Terminal</h1>
+          <p style={{ color: "var(--text-secondary)", fontSize: 20, fontWeight: 500 }}>Choose your preferred operational interface to proceed</p>
         </div>
         
-        <div style={{ display: "flex", gap: 30, width: "100%", maxWidth: 900 }}>
+        <div style={{ display: "flex", gap: 40, width: "100%", maxWidth: 1100 }}>
           {/* PHOTO METHOD */}
           <div 
             onClick={() => startTerminal('photo')}
+            className="modern-card animate-up"
             style={{
-              flex: 1, background: "#ffffff", borderRadius: 32, padding: 50,
-              border: "1px solid #e5e7eb", cursor: "pointer",
+              flex: 1, padding: 60,
+              cursor: "pointer",
               display: "flex", flexDirection: "column", alignItems: "center",
-              transition: "all 0.3s cubic-bezier(0.16, 1, 0.3, 1)",
-              boxShadow: "0 20px 40px rgba(0, 0, 0, 0.05)",
-              position: "relative"
+              transition: "all 0.5s cubic-bezier(0.16, 1, 0.3, 1)",
+              background: "rgba(15, 23, 42, 0.4)",
+              border: "1px solid var(--border)"
             }}
-            onMouseOver={e => { e.currentTarget.style.borderColor = "#9ca3af"; e.currentTarget.style.transform = "translateY(-8px) scale(1.02)"; e.currentTarget.style.boxShadow = "0 30px 60px rgba(0, 0, 0, 0.1)"; }}
-            onMouseOut={e => { e.currentTarget.style.borderColor = "#e5e7eb"; e.currentTarget.style.transform = "none"; e.currentTarget.style.boxShadow = "0 20px 40px rgba(0, 0, 0, 0.05)"; }}
           >
-            <div style={{ width: 100, height: 100, borderRadius: 24, background: "#f3f4f6", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 50, marginBottom: 25, boxShadow: "0 10px 20px rgba(0, 0, 0, 0.05)" }}>🖼️</div>
-            <h2 style={{ fontSize: 26, fontWeight: 800, color: "var(--text-1)" }}>Image Method</h2>
-            <p style={{ textAlign: "center", color: "var(--text-3)", fontSize: 15, marginTop: 15, lineHeight: 1.5 }}>
-              Visual grid selection. Best for touchscreens and quick identification of items.
+            <div style={{ width: 120, height: 120, borderRadius: 32, background: "rgba(99, 102, 241, 0.1)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 60, marginBottom: 30, border: "1px solid var(--primary-glow)", boxShadow: "0 20px 40px rgba(99, 102, 241, 0.1)" }}>🖼️</div>
+            <h2 className="text-gradient" style={{ fontSize: 32, fontWeight: 900 }}>Visual Method</h2>
+            <p style={{ textAlign: "center", color: "var(--text-dim)", fontSize: 16, marginTop: 20, lineHeight: 1.6 }}>
+              Intuitive grid-based selection. Enhanced for high-resolution touchscreens and rapid visual identification.
             </p>
+            <div style={{ marginTop: 40, padding: '12px 32px', borderRadius: 14, background: 'var(--primary)', color: 'white', fontWeight: 800, fontSize: 14 }}>LAUNCH VISUAL ➔</div>
           </div>
 
           {/* TALLY METHOD */}
           <div 
             onClick={() => startTerminal('tally')}
+            className="modern-card animate-up"
             style={{
-              flex: 1, background: "#ffffff", borderRadius: 32, padding: 50,
-              border: "1px solid #e5e7eb", cursor: "pointer",
+              flex: 1, padding: 60,
+              cursor: "pointer",
               display: "flex", flexDirection: "column", alignItems: "center",
-              transition: "all 0.3s cubic-bezier(0.16, 1, 0.3, 1)",
-              boxShadow: "0 20px 40px rgba(0, 0, 0, 0.05)"
+              transition: "all 0.5s cubic-bezier(0.16, 1, 0.3, 1)",
+              background: "rgba(15, 23, 42, 0.4)",
+              border: "1px solid var(--border)",
+              animationDelay: '0.1s'
             }}
-            onMouseOver={e => { e.currentTarget.style.borderColor = "#9ca3af"; e.currentTarget.style.transform = "translateY(-8px) scale(1.02)"; e.currentTarget.style.boxShadow = "0 30px 60px rgba(0, 0, 0, 0.1)"; }}
-            onMouseOut={e => { e.currentTarget.style.borderColor = "#e5e7eb"; e.currentTarget.style.transform = "none"; e.currentTarget.style.boxShadow = "0 20px 40px rgba(0, 0, 0, 0.05)"; }}
           >
-            <div style={{ width: 100, height: 100, borderRadius: 24, background: "#f3f4f6", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 50, marginBottom: 25, boxShadow: "0 10px 20px rgba(0, 0, 0, 0.05)" }}>⌨️</div>
-            <h2 style={{ fontSize: 26, fontWeight: 800, color: "var(--text-1)" }}>Tally Method</h2>
-            <p style={{ textAlign: "center", color: "var(--text-3)", fontSize: 15, marginTop: 15, lineHeight: 1.5 }}>
-              Keyboard-first list interface. Best for barcodes and rapid bulk entry.
+            <div style={{ width: 120, height: 120, borderRadius: 32, background: "rgba(168, 85, 247, 0.1)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 60, marginBottom: 30, border: "1px solid rgba(168, 85, 247, 0.3)", boxShadow: "0 20px 40px rgba(168, 85, 247, 0.1)" }}>⌨️</div>
+            <h2 className="text-gradient" style={{ fontSize: 32, fontWeight: 900, backgroundImage: '#a855f7' }}>Tally Method</h2>
+            <p style={{ textAlign: "center", color: "var(--text-dim)", fontSize: 16, marginTop: 20, lineHeight: 1.6 }}>
+              Keyboard-optimized ledger interface. Designed for elite operators using barcodes and high-speed entry.
             </p>
+            <div style={{ marginTop: 40, padding: '12px 32px', borderRadius: 14, background: '#a855f7', color: 'white', fontWeight: 800, fontSize: 14 }}>LAUNCH EXPRESS ➔</div>
           </div>
         </div>
         
-        <div style={{ fontSize: 13, color: "var(--text-3)", marginTop: 10, fontWeight: 600, background: "#f3f4f6", border: "1px solid #e5e7eb", padding: "10px 20px", borderRadius: 20 }}>
-          Terminal will automatically enter Full-Screen mode after selection.
+        <div style={{ fontSize: 14, color: "var(--text-dim)", marginTop: 20, fontWeight: 700, background: "rgba(255,255,255,0.03)", border: "1px solid var(--border)", padding: "12px 32px", borderRadius: 100, backdropFilter: 'blur(10px)' }}>
+          Terminal will automatically synchronize and enter Full-Screen mode upon selection.
         </div>
       </div>
     );
@@ -1114,55 +1122,46 @@ const POS = ({ showQR }) => {
         const enteredInSelling = convertUnit(enteredW, looseWeightUnit, regUnit);
         const livePrice = enteredW > 0 ? (enteredInSelling / regWeight) * regPrice : 0;
         return (
-        <div className="modal-overlay" onClick={() => setShowLooseModal(false)} style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, background: 'rgba(15,23,42,0.6)', zIndex: 10000, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-          <div onClick={e => e.stopPropagation()} style={{ background: 'white', borderRadius: '16px', width: '420px', padding: '0', overflow: 'hidden', boxShadow: '0 25px 60px rgba(0,0,0,0.3)', animation: 'slideUp 0.25s ease-out' }}>
-            <style>{`@keyframes slideUp { from { opacity: 0; transform: translateY(30px); } to { opacity: 1; transform: translateY(0); } }`}</style>
-            
+        <div className="modal-overlay" onClick={() => setShowLooseModal(false)} style={{ zIndex: 10000 }}>
+          <div className="invoice-modal animate-up" onClick={e => e.stopPropagation()} style={{ width: '420px', padding: 0, overflow: 'hidden' }}>
             {/* Header */}
-            <div style={{ background: '#6366f1', padding: '22px 28px', color: 'white' }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                <div style={{ width: '44px', height: '44px', borderRadius: '10px', background: 'rgba(255,255,255,0.2)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '24px' }}>⚖️</div>
+            <div style={{ background: 'var(--primary)', padding: '24px 32px', color: 'white' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
+                <div style={{ width: '52px', height: '52px', borderRadius: '14px', background: 'rgba(255,255,255,0.2)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '28px' }}>⚖️</div>
                 <div>
-                  <div style={{ fontWeight: 800, fontSize: '17px' }}>{looseProduct.name}</div>
-                  <div style={{ fontSize: '12px', opacity: 0.9 }}>{regWeight} {regUnit} = ₹{regPrice} · Stock: {looseProduct.quantity} {stkUnit}</div>
+                  <div style={{ fontWeight: 900, fontSize: '20px' }}>{looseProduct.name}</div>
+                  <div style={{ fontSize: '13px', opacity: 0.9, fontWeight: 600 }}>{regWeight} {regUnit} = ₹{regPrice} · Stock: {looseProduct.quantity}</div>
                 </div>
               </div>
             </div>
 
             {/* Body */}
-            <div style={{ padding: '24px 28px' }}>
-              <div style={{ fontWeight: 700, fontSize: '12px', color: '#475569', marginBottom: '10px', textTransform: 'uppercase', letterSpacing: '0.5px' }}>Enter Weight</div>
+            <div style={{ padding: '32px' }}>
+              <div style={{ fontWeight: 900, fontSize: '11px', color: 'var(--text-dim)', marginBottom: '12px', textTransform: 'uppercase', letterSpacing: '1px' }}>Operational Weight</div>
               
-              <div style={{ display: 'flex', gap: '10px', marginBottom: '14px' }}>
+              <div style={{ display: 'flex', gap: '12px', marginBottom: '20px' }}>
                 <input
                   type="number"
                   step="0.01"
                   autoFocus
+                  className="input-premium"
                   value={looseWeight}
                   onChange={e => setLooseWeight(e.target.value)}
                   onKeyDown={e => { if (e.key === 'Enter') confirmLooseAdd(); }}
-                  placeholder="e.g. 250"
-                  style={{ flex: 1, padding: '12px 16px', fontSize: '20px', fontWeight: 800, border: '2px solid #e2e8f0', borderRadius: '10px', outline: 'none', textAlign: 'center', transition: 'border-color 0.2s' }}
-                  onFocus={e => e.target.style.borderColor = '#6366f1'}
-                  onBlur={e => e.target.style.borderColor = '#e2e8f0'}
+                  placeholder="0.00"
+                  style={{ flex: 1, fontSize: '24px', fontWeight: 950, textAlign: 'center', height: '64px' }}
                 />
               </div>
 
               {/* Unit Selector */}
-              <div style={{ display: 'flex', gap: '8px', marginBottom: '16px' }}>
+              <div style={{ display: 'flex', gap: '12px', marginBottom: '24px' }}>
                 {(regUnit === 'Kg' || regUnit === 'Gram' ? ['Kg', 'Gram'] : ['Liter', 'ml']).map(u => (
                   <button
                     key={u}
                     type="button"
                     onClick={() => setLooseWeightUnit(u)}
-                    style={{
-                      flex: 1, padding: '9px', borderRadius: '8px',
-                      border: looseWeightUnit === u ? '2px solid #6366f1' : '1px solid #e2e8f0',
-                      background: looseWeightUnit === u ? '#6366f1' : '#fff',
-                      color: looseWeightUnit === u ? '#fff' : '#475569',
-                      fontWeight: 700, fontSize: '13px', cursor: 'pointer',
-                      transition: 'all 0.15s ease'
-                    }}
+                    className={looseWeightUnit === u ? "btn-primary" : "btn-outline"}
+                    style={{ flex: 1, height: '44px', fontSize: '13px', fontWeight: 800 }}
                   >{u}</button>
                 ))}
               </div>
@@ -1196,10 +1195,10 @@ const POS = ({ showQR }) => {
               </div>
 
               {/* Action Buttons */}
-              <div style={{ display: 'flex', gap: '10px' }}>
-                <button onClick={() => setShowLooseModal(false)} style={{ flex: 1, padding: '12px', borderRadius: '10px', border: '1px solid #e2e8f0', background: '#fff', color: '#64748b', fontWeight: 700, fontSize: '14px', cursor: 'pointer' }}>Cancel</button>
-                <button onClick={confirmLooseAdd} style={{ flex: 2, padding: '12px', borderRadius: '10px', border: 'none', background: '#6366f1', color: '#fff', fontWeight: 800, fontSize: '14px', cursor: 'pointer' }}>
-                  ✓ Add to Bill
+              <div style={{ display: 'flex', gap: '12px', marginTop: '24px' }}>
+                <button onClick={() => setShowLooseModal(false)} className="btn-outline" style={{ flex: 1, height: '52px' }}>ABORT</button>
+                <button onClick={confirmLooseAdd} className="btn-primary" style={{ flex: 2, height: '52px' }}>
+                  ADD TO BILL ➔
                 </button>
               </div>
             </div>
@@ -1210,210 +1209,128 @@ const POS = ({ showQR }) => {
 
       {/* ── CAMERA SCANNER MODAL ── */}
       {isScannerOpen && (
-        <div className="modal-overlay" onClick={() => setIsScannerOpen(false)}>
-          <div className="invoice-modal" onClick={e => e.stopPropagation()} style={{ maxWidth: 450, padding: 30 }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20 }}>
-              <h3 style={{ margin: 0, display: 'flex', alignItems: 'center', gap: 10 }}>
-                <QrCode size={24} color="var(--primary)" /> 
-                Scan Product Barcode
-              </h3>
-              <button onClick={() => setIsScannerOpen(false)} style={{ background: 'none', border: 'none', fontSize: 24, cursor: 'pointer', color: '#94a3b8' }}>×</button>
+        <div className="modal-overlay" style={{ zIndex: 10000 }}>
+          <div className="invoice-modal animate-up" style={{ width: '550px' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '32px' }}>
+              <h2 className="text-gradient" style={{ margin: 0, fontSize: '24px', fontWeight: 900 }}>Inventory Vision</h2>
+              <button onClick={() => setIsScannerOpen(false)} className="btn-outline" style={{ width: '40px', height: '40px', padding: 0, borderRadius: '50%' }}>✕</button>
             </div>
             
-            <div id="pos-reader" style={{ width: '100%', borderRadius: 12, overflow: 'hidden', border: '2px solid var(--border)', background: '#000' }}></div>
+            <div id="reader" style={{ width: '100%', borderRadius: '24px', overflow: 'hidden', border: '2px solid var(--primary)', background: '#000', boxShadow: '0 0 40px var(--primary-glow)' }}></div>
             
-            <div style={{ marginTop: 20, padding: 15, background: '#f8fafc', borderRadius: 10, textAlign: 'center' }}>
-               <div style={{ fontSize: '11px', color: '#64748b', marginBottom: '6px', fontWeight: 'bold', textTransform: 'uppercase' }}>
-                  Scanner Status
-               </div>
-               <div style={{ fontSize: '14px', fontWeight: '800', color: scanStatus.includes('✅') ? '#059669' : '#2563eb' }}>
-                  {scanStatus}
-               </div>
-               
-               {detectedBarcode && (
-                 <div style={{ marginTop: '10px', paddingTop: '10px', borderTop: '1px solid #e2e8f0' }}>
-                    <div style={{ fontSize: '10px', color: '#94a3b8' }}>DETECTED NUMBER</div>
-                    <div style={{ fontSize: '18px', fontWeight: '900', color: '#1e293b', letterSpacing: '1px' }}>{detectedBarcode}</div>
-                 </div>
-               )}
+            <div className="glass-panel" style={{ marginTop: '32px', padding: '24px', background: 'rgba(0,0,0,0.3)', border: '1px solid var(--glass-border)' }}>
+               <div style={{ fontSize: '10px', color: 'var(--text-dim)', marginBottom: '12px', fontWeight: 900, textTransform: 'uppercase', letterSpacing: '2px' }}>Neural Link Status</div>
+               <div style={{ fontSize: '18px', fontWeight: 800, color: 'var(--primary)' }}>SYSTEM ACTIVE · SCANNING...</div>
             </div>
 
-            <button 
-              onClick={() => setIsScannerOpen(false)} 
-              className="btn-outline" 
-              style={{ width: '100%', marginTop: 20, height: 45, fontWeight: 700 }}
-            >
-              Cancel Scanning
-            </button>
+            <button className="btn-primary" style={{ marginTop: '32px', width: '100%', height: '56px', background: 'var(--danger)' }} onClick={() => setIsScannerOpen(false)}>DEACTIVATE SENSORS</button>
           </div>
         </div>
       )}
 
       {/* ── CHECKOUT MODAL ───── */}
       {showInvoice && (
-        <div className="modal-overlay" style={{
-          position: "fixed", top: 0, left: 0, right: 0, bottom: 0,
-          backgroundColor: invoiceSuccess ? "white" : "rgba(15, 23, 42, 0.6)",
-          zIndex: 1000,
-          display: invoiceSuccess ? "block" : "flex",
-          justifyContent: "center", alignItems: "center",
-          overflowY: "auto"
-        }}>
+        <div className="modal-overlay" style={{ zIndex: 10000 }}>
           {!invoiceSuccess ? (
-            <div className="modal-content" style={{
-              background: "white", padding: "30px", borderRadius: "12px",
-              width: "650px", maxHeight: "90vh", overflowY: "auto",
-              boxShadow: "0 25px 50px -12px rgba(0,0,0,0.25)"
-            }}>
+            <div className="invoice-modal animate-up" style={{ width: '800px' }}>
               {checkoutStep === 1 && (
                 <>
-                  <h2 style={{ marginTop: 0, marginBottom: "20px", color: "#0f172a" }}>1. Customer & Order Summary</h2>
-                  <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "15px", marginBottom: "20px" }}>
-                    <div className="form-group">
-                      <label className="form-label">Phone Number (Auto Search)</label>
-                      <input className="form-input" placeholder="e.g. 9876543210" value={customer.phone} onChange={handlePhoneChange} />
+                  <h2 className="text-gradient" style={{ marginBottom: '32px', fontSize: '32px', fontWeight: 950 }}>Transaction Overview</h2>
+                  
+                  <div className="grid-2" style={{ gap: '24px', marginBottom: '32px' }}>
+                    <div>
+                      <label className="form-label">Client Contact</label>
+                      <input className="input-premium" placeholder="Enter mobile..." value={customer.phone} onChange={handlePhoneChange} />
                     </div>
-                    <div className="form-group">
-                      <label className="form-label">Customer Name</label>
-                      <input className="form-input" placeholder="e.g. John Doe" value={customer.name} onChange={e => setCustomer({ ...customer, name: e.target.value })} />
-                    </div>
-                    <div className="form-group" style={{ gridColumn: "1 / -1" }}>
-                      <label className="form-label">Address</label>
-                      <input className="form-input" placeholder="e.g. 1st street, city..." value={customer.address} onChange={e => setCustomer({ ...customer, address: e.target.value })} />
+                    <div>
+                      <label className="form-label">Client Identity</label>
+                      <input className="input-premium" placeholder="Enter name..." value={customer.name} onChange={e => setCustomer({ ...customer, name: e.target.value })} />
                     </div>
                   </div>
 
-                  <table style={{ width: "100%", borderCollapse: "collapse", marginBottom: "20px", fontSize: "0.9rem", color: "#475569" }}>
-                    <thead>
-                      <tr style={{ borderBottom: "2px solid #e2e8f0", textAlign: "left", color: "#1e293b" }}>
-                        <th style={{ padding: "8px 0" }}>Item</th>
-                        <th style={{ padding: "8px 0", textAlign: "center" }}>Qty</th>
-                        <th style={{ padding: "8px 0", textAlign: "center" }}>Disc%</th>
-                        <th style={{ padding: "8px 0", textAlign: "right" }}>Total</th>
-                      </tr>
-                    </thead>
-                    <tbody>
+                  <div className="glass-panel" style={{ padding: '32px', background: 'rgba(0,0,0,0.2)', marginBottom: '32px' }}>
+                    <div style={{ fontSize: '10px', fontWeight: 900, color: 'var(--text-dim)', textTransform: 'uppercase', letterSpacing: '1.5px', marginBottom: '16px' }}>Manifest Items</div>
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
                       {[...billItems.filter(i => i.qty > 0 && i.id), ...freeItems].map((item, idx) => (
-                        <tr key={idx} style={{ borderBottom: "1px solid #f1f5f9" }}>
-                          <td style={{ padding: "10px 0", fontWeight: "500" }}>
-                            {item.name} {item.isFree && <span style={{ color: "white", backgroundColor: "#10b981", fontSize: "0.7rem", padding: "2px 6px", borderRadius: "4px", marginLeft: "6px" }}>FREE</span>} <br />
-                            <span style={{ fontSize: "0.75rem", color: "#94a3b8" }}>
-                              {item.isFree ? `Offer: ${item.offerName}` : `₹${item.price} ${settings.gstNumber ? `(${item.price_type}) + ${item.gstRate}% GST` : ''}`}
-                            </span>
-                          </td>
-                          <td style={{ padding: "10px 0", textAlign: "center" }}>{item.qty}</td>
-                          <td style={{ padding: "10px 0", textAlign: "center", color: item.discountPercent > 0 ? '#10b981' : '#94a3b8' }}>
-                            {item.discountPercent > 0 ? `${item.discountPercent}%` : '—'}
-                            {item.discountAmt > 0 && <div style={{ fontSize: '0.7rem' }}>-₹{item.discountAmt.toFixed(2)}</div>}
-                          </td>
-                          <td style={{ padding: "10px 0", textAlign: "right", fontWeight: "bold", color: "#0f172a" }}>₹{(item.total + item.gstAmt - (item.discountAmt || 0)).toFixed(2)}</td>
-                        </tr>
+                        <div key={idx} style={{ display: 'flex', justifyContent: 'space-between', padding: '12px 16px', background: 'rgba(255,255,255,0.03)', borderRadius: '12px', border: '1px solid var(--glass-border)' }}>
+                          <div style={{ fontWeight: 700, fontSize: '14px' }}>
+                            {item.name} {item.isFree && <span style={{ color: 'var(--success)', fontSize: '10px', fontWeight: 900, marginLeft: '8px' }}>[FREE]</span>}
+                          </div>
+                          <div style={{ fontWeight: 900, fontSize: '15px' }}>{item.qty} × ₹{item.price}</div>
+                        </div>
                       ))}
-                    </tbody>
-                  </table>
-
-                  <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "20px", marginTop: "20px", borderTop: "2px solid #e2e8f0", paddingTop: "15px" }}>
-                    <div style={{ color: "#64748b", fontSize: "0.85rem" }}>
-                      Subtotal: ₹{subtotal.toFixed(2)}
-                      {settings.gstNumber && <><br/>CGST (Total): ₹{totalCGST.toFixed(2)}<br/>SGST (Total): ₹{totalSGST.toFixed(2)}</>}
-                      {totalDiscount > 0 && <><br/><span style={{ color: '#10b981' }}>Discount: -₹{totalDiscount.toFixed(2)}</span></>}
-                    </div>
-                    <div style={{ textAlign: "right", fontSize: "1.4rem", fontWeight: "800", color: "var(--primary)" }}>
-                      Payable: ₹{grandTotal}
                     </div>
                   </div>
 
-                  <div style={{ display: "flex", justifyContent: "space-between", gap: "15px" }}>
-                    <button onClick={() => setShowInvoice(false)} className="btn-outline">Cancel</button>
-                    <button onClick={() => setCheckoutStep(2)} className="btn-primary">Continue to Payment ➔</button>
+                  <div className="flex-between" style={{ padding: '24px 32px', background: 'rgba(99,102,241,0.1)', borderRadius: '20px', border: '1px solid var(--primary-glow)', marginBottom: '32px' }}>
+                    <div style={{ fontSize: '18px', fontWeight: 800 }}>Total Revenue Due</div>
+                    <div style={{ fontSize: '32px', fontWeight: 950, color: 'var(--primary)' }}>₹{grandTotal}</div>
+                  </div>
+
+                  <div style={{ display: 'flex', gap: '16px' }}>
+                    <button onClick={() => setShowInvoice(false)} className="btn-outline" style={{ flex: 1, height: '60px' }}>ABORT</button>
+                    <button onClick={() => setCheckoutStep(2)} className="btn-primary" style={{ flex: 2, height: '60px', fontSize: '18px' }}>CONTINUE TO PAYMENT ➔</button>
                   </div>
                 </>
               )}
 
               {checkoutStep === 2 && (
                 <>
-                  <h2 style={{ marginTop: 0, marginBottom: "20px", color: "#0f172a" }}>2. Payment Verification</h2>
-                  <div style={{ textAlign: "center", marginBottom: "25px" }}>
-                    <div style={{ fontSize: "2.5rem", fontWeight: "bold", color: "#0f172a" }}>₹{grandTotal}</div>
-                    <div style={{ color: "#64748b", fontSize: "0.9rem" }}>Net Payable Amount</div>
+                  <h2 className="text-gradient" style={{ marginBottom: '32px', fontSize: '32px', fontWeight: 950 }}>Payment Settlement</h2>
+                  
+                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px', marginBottom: '40px' }}>
+                    {[
+                      { id: 'Cash', label: 'CASH ASSET', icon: '💵' },
+                      { id: 'UPI', label: 'DIGITAL UPI', icon: '📱' },
+                      { id: 'Card', label: 'CREDIT/DEBIT', icon: '💳' },
+                      { id: 'Credit', label: 'DEBT / CREDIT', icon: '📝' }
+                    ].map(m => (
+                      <div 
+                        key={m.id}
+                        onClick={() => setPaymentMode(m.id)}
+                        className={`modern-card ${paymentMode === m.id ? 'pulse' : ''}`}
+                        style={{ 
+                          padding: '24px', cursor: 'pointer', textAlign: 'center',
+                          border: paymentMode === m.id ? '2px solid var(--primary)' : '1px solid var(--glass-border)',
+                          background: paymentMode === m.id ? 'rgba(99,102,241,0.1)' : 'rgba(0,0,0,0.1)'
+                        }}
+                      >
+                        <div style={{ fontSize: '32px', marginBottom: '12px' }}>{m.icon}</div>
+                        <div style={{ fontWeight: 900, fontSize: '14px', letterSpacing: '1px' }}>{m.label}</div>
+                      </div>
+                    ))}
                   </div>
 
-                  <div style={{ border: "1px solid #e2e8f0", padding: "20px", borderRadius: "8px", marginBottom: "25px" }}>
-                    <div style={{ display: "flex", gap: "20px", marginBottom: "20px" }}>
-                      <label style={{ display: "flex", alignItems: "center", gap: "8px", cursor: "pointer", fontWeight: "bold" }}>
-                        <input type="radio" checked={paymentMode === "Cash"} onChange={() => setPaymentMode("Cash")} /> 💵 Cash
-                      </label>
-                      <label style={{ display: "flex", alignItems: "center", gap: "8px", cursor: "pointer", fontWeight: "bold" }}>
-                        <input type="radio" checked={paymentMode === "UPI"} onChange={() => setPaymentMode("UPI")} /> 📱 UPI (GPay/PhonePe)
-                      </label>
-                    </div>
-
-                    {paymentMode === "Cash" && (
-                      <div style={{ display: "grid", gridTemplateColumns: "1fr", gap: "15px" }}>
-                        <div>
-                          <label className="form-label">Amount Given By Customer (₹)</label>
-                          <input type="text" inputMode="decimal" className="form-input" autoFocus style={{ fontSize: "1.2rem", padding: "12px" }}
-                            value={amountReceived} onChange={e => setAmountReceived(e.target.value.replace(/[^0-9.]/g, ''))} placeholder={`₹ ${grandTotal}`} />
-                        </div>
-                        {amountReceived && Number(amountReceived) >= Number(grandTotal) && (
-                          <div style={{ padding: "15px", backgroundColor: "#ecfdf5", borderRadius: "6px", fontSize: "1.2rem", color: "#059669", textAlign: "center", fontWeight: "bold" }}>
-                            Give Change: ₹{(Number(amountReceived) - Number(grandTotal)).toFixed(2)}
-                          </div>
-                        )}
-                      </div>
-                    )}
-
-                    {paymentMode === "UPI" && (
-                      <div style={{ textAlign: 'center', backgroundColor: "#f8fafc", padding: "20px", borderRadius: "8px" }}>
-                        <div style={{ fontWeight: "bold", color: "#0f172a", fontSize: "1.2rem", marginBottom: 15 }}>Scan to Pay ₹{grandTotal}</div>
-                        
-                        <div style={{ display: 'flex', justifyContent: 'center', gap: 20, flexWrap: 'wrap' }}>
-                  {/* Dynamic QR */}
-                  {settings.upiId ? (
-                    <div style={{ background: '#fff', padding: 10, borderRadius: 12, boxShadow: '0 4px 12px rgba(0,0,0,0.05)' }}>
-                      <img 
-                        src={`https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(`upi://pay?pa=${settings.upiId}&pn=${settings.storeName || 'Shop'}&am=${grandTotal}&cu=INR`)}`}
-                        alt="Dynamic UPI QR"
-                        style={{ width: 180, height: 180 }}
+                  {paymentMode === 'Cash' && (
+                    <div className="glass-panel" style={{ padding: '24px', background: 'rgba(0,0,0,0.2)', marginBottom: '32px' }}>
+                      <label className="form-label">Tendered Amount (₹)</label>
+                      <input 
+                        className="input-premium" 
+                        type="number" 
+                        value={amountReceived} 
+                        onChange={e => setAmountReceived(e.target.value)}
+                        autoFocus
+                        style={{ fontSize: '28px', fontWeight: 950, textAlign: 'center' }}
                       />
-                      <div style={{ fontSize: 10, color: '#64748b', marginTop: 8 }}>DYNAMIC AMOUNT QR</div>
-                    </div>
-                  ) : (
-                    <div style={{ padding: 20, border: '2px dashed #cbd5e1', borderRadius: 12, color: '#64748b', fontSize: 12, maxWidth: 200 }}>
-                      UPI ID not set in Settings.<br/>Cannot generate dynamic QR.
+                      {Number(amountReceived) > grandTotal && (
+                        <div className="flex-between" style={{ marginTop: '20px', color: 'var(--success)', fontWeight: 800 }}>
+                          <span>CHANGE TO RETURN:</span>
+                          <span style={{ fontSize: '20px' }}>₹{(Number(amountReceived) - grandTotal).toFixed(2)}</span>
+                        </div>
+                      )}
                     </div>
                   )}
-                </div>
 
-                        <div style={{ marginTop: 20, padding: 12, background: '#fff', borderRadius: 8, fontSize: 13, color: '#1e293b', border: '1px solid #e2e8f0' }}>
-                           VPA: <span style={{ fontFamily: 'monospace', fontWeight: 700 }}>{settings.upiId || 'Not Configured'}</span>
-                        </div>
-                        
-                        <div style={{ fontSize: "0.9rem", color: "#64748b", marginTop: "15px" }}>
-                          Ask customer to scan and verify the amount <b>₹{grandTotal}</b>.
-                        </div>
-                      </div>
-                    )}
-                  </div>
-
-                  <div style={{ display: "flex", justifyContent: "space-between", gap: "15px" }}>
-                    <button onClick={() => setCheckoutStep(1)} className="btn-outline">Back</button>
-                    {paymentMode === "UPI" ? (
-                      <button onClick={finalizeInvoice} className="btn-primary" style={{ flex: 1, fontSize: "1.05rem", background: '#059669' }}>
-                        ✅ Payment Done & Generate Bill
-                      </button>
-                    ) : (
-                      <button onClick={finalizeInvoice} className="btn-primary" style={{ flex: 1, fontSize: "1.05rem" }}>
-                        Complete Payment ✓
-                      </button>
-                    )}
+                  <div style={{ display: 'flex', gap: '16px' }}>
+                    <button onClick={() => setCheckoutStep(1)} className="btn-outline" style={{ flex: 1, height: '60px' }}>BACK</button>
+                    <button onClick={finalizeInvoice} className="btn-primary" style={{ flex: 2, height: '60px', fontSize: '18px' }}>FINALIZE TRANSACTION ➔</button>
                   </div>
                 </>
               )}
             </div>
           ) : (
             /* ── PRINTABLE INVOICE ─ */
-            <div className="printable-invoice" style={{ background: "white", maxWidth: "800px", margin: "40px auto", padding: "40px", boxShadow: "0 10px 30px rgba(0,0,0,0.1)" }}>
+            <div id="printable-invoice" style={{ background: "white", padding: "40px", width: "100%", height: "100%", color: "#000" }}>
               <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", borderBottom: "2px solid #333", paddingBottom: "20px", marginBottom: "30px" }}>
                 <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
                   {settings.billLogo && (
@@ -1574,440 +1491,229 @@ const POS = ({ showQR }) => {
       )}
 
       {/* ── MAIN LAYOUT ─── */}
-      <div style={{ display: "flex", flex: 1, overflow: "hidden", height: "100%", background: "var(--bg)" }}>
+      <div className="animate-fade" style={{ height: "100%", display: "flex", gap: "24px", overflow: "hidden" }}>
         
         {/* LEFT PANEL: PRODUCTS SELECTION */}
-        <div style={{ flex: 1, display: "flex", flexDirection: "column", padding: "20px", overflow: "hidden" }}>
+        <div className="modern-card" style={{ flex: 1, display: "flex", flexDirection: "column", padding: "24px", overflow: "hidden" }}>
           
-          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 20 }}>
+          <header style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: '30px' }}>
             <div>
-              <h2 style={{ margin: 0, fontSize: 20, fontWeight: 800 }}>{billingMode === 'photo' ? '🖼️ Image Billing' : '⌨️ Tally Billing'}</h2>
-              <div style={{ fontSize: 12, color: "var(--text-4)" }}>Terminal Active · Full Screen Mode</div>
+              <h2 className="text-gradient" style={{ margin: 0, fontSize: '24px', fontWeight: 800 }}>
+                {billingMode === 'photo' ? 'Visual Terminal' : 'Express Tally'}
+              </h2>
+              <div style={{ fontSize: '13px', color: "var(--text-muted)", marginTop: '4px' }}>
+                Mode: <span style={{ color: 'var(--primary)', fontWeight: 700 }}>{billingMode === 'photo' ? 'Image-Based' : 'High-Speed Keyboard'}</span>
+              </div>
             </div>
-            <div style={{ display: "flex", gap: 8, alignItems: 'center' }}>
+            
+            <div style={{ display: "flex", gap: '12px', alignItems: 'center' }}>
               {billingMode === 'photo' && (
                 <div style={{ position: 'relative', display: 'flex', alignItems: 'center' }}>
-                  <Search size={14} style={{ position: 'absolute', left: 10, color: '#94a3b8' }} />
+                  <Search size={18} style={{ position: 'absolute', left: 14, color: 'var(--text-dim)' }} />
                   <input
                     type="text"
-                    placeholder="Search products..."
+                    placeholder="Search by name or code..."
+                    className="input-premium"
                     value={photoSearch}
                     onChange={e => setPhotoSearch(e.target.value)}
-                    style={{ padding: '6px 12px 6px 30px', fontSize: 12, border: '1px solid #e2e8f0', borderRadius: 8, width: 180, outline: 'none', background: '#fff' }}
+                    style={{ paddingLeft: '44px', width: '240px' }}
                   />
-                  {photoSearch && <button onClick={() => setPhotoSearch('')} style={{ position: 'absolute', right: 6, background: 'none', border: 'none', cursor: 'pointer', fontSize: 12, color: '#94a3b8', padding: 2 }}>✕</button>}
                 </div>
               )}
               <button 
                 onClick={() => setIsScannerOpen(true)} 
                 className="btn-primary" 
-                style={{ padding: "6px 14px", fontSize: 11, background: "#059669", display: 'flex', gap: '6px', alignItems: 'center' }}
+                style={{ background: '#059669', padding: '10px 20px' }}
               >
-                <Camera size={14} /> Scan Barcode
+                <Camera size={18} /> Barcode Scan
               </button>
-              <button onClick={handleLocalRefresh} className="btn-outline" style={{ padding: "6px 12px", fontSize: 11 }}>🔄 Refresh</button>
-              <button onClick={() => { setTerminalActive(false); if(document.exitFullscreen) document.exitFullscreen(); }} className="btn-outline" style={{ padding: "6px 12px", fontSize: 11 }}>Exit Terminal</button>
+              <button onClick={handleLocalRefresh} className="btn-outline" style={{ padding: '10px' }} title="Sync Database">
+                <RefreshCw size={18} />
+              </button>
+              <button onClick={() => { setTerminalActive(false); if(document.exitFullscreen) document.exitFullscreen(); }} className="btn-outline" style={{ color: 'var(--danger)', borderColor: 'rgba(244, 63, 94, 0.2)' }}>
+                Exit Terminal
+              </button>
             </div>
-          </div>
+          </header>
 
           {billingMode === 'photo' ? (
-            /* PHOTO GRID */
-            <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(180px, 1fr))", gap: "20px", overflowY: "auto", paddingBottom: "30px", alignContent: "flex-start" }}>
+            /* PHOTO GRID — PREMIUM RE-IMAGINED */
+            <div className="grid-auto animate-fade" style={{ 
+              flex: 1, 
+              overflowY: "auto", 
+              padding: '10px',
+              display: 'grid',
+              gridTemplateColumns: "repeat(auto-fill, minmax(180px, 1fr))", 
+              gap: '24px',
+              alignContent: "start"
+            }}>
               {filteredProducts.map(p => {
-              const isOutOfStock = Number(p.quantity || 0) <= 0;
-              const isLowStock = !isOutOfStock && Number(p.quantity || 0) <= 5;
-              const isDisabled = isExpired(p) || isOutOfStock;
-              return (
-                <div 
-                  key={p.id} 
-                  style={{
-                    background: "white",
-                    borderRadius: "var(--r-lg)",
-                    border: `1px solid ${isOutOfStock ? '#ef444440' : isLowStock ? '#f59e0b40' : 'var(--border)'}`,
-                    overflow: "hidden",
-                    display: "flex",
-                    flexDirection: "column",
-                    boxShadow: "var(--shadow-sm)",
-                    opacity: isDisabled ? 0.5 : 1,
-                    transition: "all 0.2s ease"
-                  }}
-                >
-                  <div style={{ height: "140px", background: "#f8fafc", position: "relative", display: "flex", alignItems: "center", justifyContent: "center", borderBottom: "1px solid var(--border)" }}>
-                    {p.image ? (
-                      <img src={p.image} alt={p.name} style={{ width: "100%", height: "100%", objectFit: "cover" }} />
-                    ) : (
-                      <div style={{ fontSize: "40px", color: "#cbd5e1" }}>🛍️</div>
-                    )}
-                    {isExpired(p) && (
-                      <div style={{ position: "absolute", top: 10, right: 10, background: "#ef4444", color: "white", fontSize: "10px", fontWeight: "bold", padding: "2px 6px", borderRadius: "10px" }}>
-                        EXPIRED
+                const isOutOfStock = Number(p.quantity || 0) <= 0;
+                const isLowStock = !isOutOfStock && Number(p.quantity || 0) <= 5;
+                const isDisabled = isExpired(p) || isOutOfStock;
+                return (
+                  <div 
+                    key={p.id} 
+                    className="glass-card animate-up"
+                    style={{
+                      opacity: isDisabled ? 0.6 : 1,
+                      cursor: isDisabled ? 'not-allowed' : 'pointer',
+                      display: 'flex', flexDirection: 'column',
+                      padding: '16px',
+                      background: 'rgba(15, 23, 42, 0.4)',
+                      border: '1px solid var(--border)',
+                      borderRadius: '24px',
+                      transition: 'all 0.3s cubic-bezier(0.16, 1, 0.3, 1)',
+                      position: 'relative',
+                      overflow: 'hidden'
+                    }}
+                    onClick={() => !isDisabled && addProductToCart(p)}
+                  >
+                    {/* Image Area */}
+                    <div style={{ 
+                      height: "140px", 
+                      borderRadius: '18px',
+                      background: 'rgba(0, 0, 0, 0.2)',
+                      display: 'flex', alignItems: 'center', justifyContent: 'center',
+                      marginBottom: '16px',
+                      overflow: 'hidden',
+                      border: '1px solid var(--glass-border)'
+                    }}>
+                      {p.image ? (
+                        <img src={p.image} alt={p.name} style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+                      ) : (
+                        <div style={{ fontSize: "40px", opacity: 0.1 }}>📦</div>
+                      )}
+                    </div>
+
+                    <div style={{ padding: "20px", flex: 1, display: 'flex', flexDirection: 'column' }}>
+                      <h3 style={{ fontSize: '16px', fontWeight: 700, marginBottom: '6px', lineHeight: 1.4 }}>{p.name}</h3>
+                      <div style={{ fontSize: '12px', color: 'var(--text-dim)', marginBottom: '16px' }}>
+                        Stock: <span style={{ color: isLowStock ? 'var(--warning)' : 'var(--text-muted)' }}>{p.quantity} {p.unit}</span>
                       </div>
-                    )}
-                    {isOutOfStock && !isExpired(p) && (
-                      <div style={{ position: "absolute", top: 10, right: 10, background: "#ef4444", color: "white", fontSize: "10px", fontWeight: "bold", padding: "2px 6px", borderRadius: "10px" }}>
-                        OUT OF STOCK
-                      </div>
-                    )}
-                    {isLowStock && (
-                      <div style={{ position: "absolute", top: 10, right: 10, background: "#f59e0b", color: "white", fontSize: "10px", fontWeight: "bold", padding: "2px 6px", borderRadius: "10px" }}>
-                        LOW STOCK
-                      </div>
-                    )}
-                    {p.product_type === 'loose' && (
-                      <div style={{ position: "absolute", bottom: 8, left: 8, background: "#f59e0b", color: "white", fontSize: "9px", fontWeight: "800", padding: "3px 8px", borderRadius: "10px", display: 'flex', alignItems: 'center', gap: '3px' }}>
-                        ⚖️ LOOSE
-                      </div>
-                    )}
-                  </div>
-                  <div style={{ padding: "15px", display: "flex", flexDirection: "column", flex: 1, justifyContent: "space-between" }}>
-                    <div>
-                      <div style={{ fontWeight: "600", fontSize: "14px", color: "var(--text-1)", marginBottom: "4px", lineHeight: "1.3" }}>{p.name}</div>
-                      <div style={{ fontSize: "11px", color: isOutOfStock ? '#ef4444' : isLowStock ? '#f59e0b' : 'var(--text-3)', fontWeight: isOutOfStock || isLowStock ? 600 : 400, marginBottom: "10px" }}>
-                        Stock: {p.quantity} {p.product_type === 'loose' ? (p.stock_unit || p.unit) : p.unit}
+                      
+                      <div style={{ marginTop: 'auto', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                        <div style={{ fontSize: '20px', fontWeight: 800, color: 'var(--primary)' }}>₹{p.price}</div>
+                        <div className="flex-center" style={{ width: '36px', height: '36px', background: 'var(--primary)', borderRadius: '10px', color: 'white', fontSize: '20px' }}>+</div>
                       </div>
                     </div>
-                    <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
-                      <div>
-                        <div style={{ fontWeight: "700", color: "var(--primary)", fontSize: "15px" }}>₹{p.price}</div>
-                        {p.product_type === 'loose' && p.weight && <div style={{ fontSize: '9px', color: '#6366f1', fontWeight: 700 }}>{p.weight} {p.unit}</div>}
-                      </div>
-                      <button 
-                        onClick={() => addProductToCart(p)}
-                        disabled={isDisabled}
-                        style={{
-                          background: isDisabled ? '#94a3b8' : 'var(--primary)', color: "white", border: "none",
-                          width: "32px", height: "32px", borderRadius: "50%",
-                          fontSize: "20px", display: "flex", alignItems: "center", justifyContent: "center", 
-                          cursor: isDisabled ? 'not-allowed' : 'pointer',
-                          transition: 'all 0.15s ease'
-                        }}
-                      >+</button>
-                    </div>
                   </div>
-                </div>
-              );
-            })}
+                );
+              })}
             </div>
           ) : (
-            /* TALLY LIST VIEW */
-            /* ── TALLY TERMINAL VIEW ── */
-            <div className="pos-container" style={{ flex: 1, display: "flex", flexDirection: "column", background: "white", borderRadius: 16, border: "1px solid var(--border)", overflow: "hidden", position: "relative" }}>
-              
-
-              {/* Tally Table Header */}
-              <div className="pos-table-header" style={{ gridTemplateColumns: settings.gstNumber ? "50px 1fr 100px 112px 72px 72px 90px 110px" : "50px 1fr 100px 112px 72px 110px" }}>
-                <div>S.NO</div>
-                <div>DESCRIPTION</div>
-                <div>RATE (₹)</div>
-                <div>QTY</div>
-                <div>DISC %</div>
-                {settings.gstNumber && <div>GST %</div>}
-                {settings.gstNumber && <div>GST (₹)</div>}
-                <div>AMOUNT (₹)</div>
+            /* TALLY METHOD — EXPRESS LEDGER */
+            <div className="modern-card animate-fade" style={{ flex: 1, display: 'flex', flexDirection: 'column', padding: 0, overflow: 'hidden' }}>
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 100px 140px 140px 60px', padding: '16px 24px', background: 'rgba(255,255,255,0.02)', borderBottom: '1px solid var(--glass-border)', fontSize: '11px', fontWeight: 900, color: 'var(--text-dim)', textTransform: 'uppercase', letterSpacing: '1px' }}>
+                <div>Item Protocol / Search</div>
+                <div style={{ textAlign: 'center' }}>Price</div>
+                <div style={{ textAlign: 'center' }}>Quantity</div>
+                <div style={{ textAlign: 'right' }}>Extension</div>
+                <div />
               </div>
-
-              {/* Tally Table Body */}
-              <div id="tally-body" style={{ flex: 1, overflowY: "auto", position: "relative" }}>
+              
+              <div style={{ flex: 1, overflowY: 'auto' }}>
                 {billItems.map((item, idx) => (
-                  <div 
-                    key={item.tempId || idx} 
-                    className="pos-row" 
-                    style={{ 
-                      background: currentRow === idx ? "rgba(37, 99, 235, 0.05)" : "transparent",
-                      gridTemplateColumns: settings.gstNumber ? "50px 1fr 100px 112px 72px 72px 90px 110px" : "50px 1fr 100px 112px 72px 110px"
-                    }}
-                  >
-                    <div className="pos-cell" style={{ color: "var(--text-4)", fontSize: 11 }}>{idx + 1}</div>
-                    
-                    {/* Description / Search Cell */}
-                    <div className="pos-cell" style={{ position: "relative" }}>
+                  <div key={idx} style={{ display: 'grid', gridTemplateColumns: '1fr 100px 140px 140px 60px', alignItems: 'center', padding: '16px 24px', borderBottom: '1px solid rgba(255,255,255,0.03)', gap: '16px', position: 'relative' }}>
+                    <div style={{ position: 'relative' }}>
                       <input 
-                        ref={el => inputRefs.current[`${idx}_name`] = el}
-                        className="pos-input"
-                        style={{ textAlign: "left", fontWeight: item.id ? 700 : 400 }}
-                        placeholder="Type to search..."
-                        value={item.name}
-                        onChange={(e) => handleInputChange(idx, e.target.value)}
+                        className="input-premium"
+                        style={{ width: '100%', height: '48px', fontWeight: 700 }}
+                        placeholder="Type nomenclature or scan SKU..."
+                        value={item.name || ""}
+                        onChange={(e) => handleItemNameChange(idx, e.target.value)}
                         onKeyDown={(e) => handleKeyDown(e, idx, "name")}
-                        onFocus={() => setCurrentRow(idx)}
+                        autoFocus={idx === billItems.length - 1}
                       />
-                      
-                      {/* Tally-style Suggestion Box */}
                       {suggestions.length > 0 && currentRow === idx && (
-                        <div className="tally-suggestions" style={{ left: 0, width: "100%", minWidth: 400 }}>
-                          <div style={{ padding: "6px 12px", background: "var(--surface-3)", fontSize: 10, fontWeight: 800, color: "var(--text-4)", borderBottom: "1px solid var(--border)", letterSpacing: 1 }}>LIST OF STOCK ITEMS</div>
+                        <div className="glass-panel animate-up" style={{ position: 'absolute', top: '100%', left: 0, right: 0, zIndex: 1000, marginTop: '8px', padding: '8px', background: '#0f172a', border: '1px solid var(--primary-glow)' }}>
                           {suggestions.map((s, sIdx) => (
-                            <div 
-                              key={s.id}
-                              className={`tally-suggestion-item ${sIdx === selectedSugIndex ? 'selected' : ''}`}
-                              onClick={() => selectProduct(s, idx)}
-                            >
-                              <span>{s.name}{s.product_type === 'loose' ? ' (Loose)' : ''} <small style={{ marginLeft: 8, opacity: 0.6 }}>({s.product_code || 'N/A'})</small></span>
-                              <span>₹{s.price} | Stock: {s.quantity}</span>
+                            <div key={s.id} onClick={() => selectProduct(s, idx)} style={{ padding: '12px 16px', borderRadius: '12px', background: sIdx === selectedSugIndex ? 'var(--primary)' : 'transparent', cursor: 'pointer', display: 'flex', justifyContent: 'space-between', marginBottom: '4px', transition: '0.2s' }}>
+                              <span style={{ fontWeight: 700 }}>{s.name}</span>
+                              <span style={{ opacity: 0.8, fontSize: '13px' }}>₹{s.price} | {s.quantity} stk</span>
                             </div>
                           ))}
                         </div>
                       )}
                     </div>
-
-                    <div className="pos-cell" style={{ color: "var(--text-3)" }}>{item.price ? `₹${item.price}` : ""}</div>
-                    
-                    <div className="pos-cell">
-                      {item.id ? (
-                        <div className="qty-stepper">
-                          <button 
-                            className="qty-btn qty-minus"
-                            onClick={() => updateQty(idx, (item.qty || 0) - 1)}
-                            disabled={!item.qty || item.qty <= 0}
-                          >–</button>
-                          <input 
-                            ref={el => inputRefs.current[`${idx}_qty`] = el}
-                            type="number"
-                            className="pos-input"
-                            style={{ width: 45, fontWeight: 800, fontSize: 13, background: 'transparent' }}
-                            value={item.qty || ""}
-                            onFocus={(e) => { e.target.select(); setCurrentRow(idx); }}
-                            onKeyDown={(e) => handleKeyDown(e, idx, "qty")}
-                            onChange={(e) => updateQty(idx, e.target.value)}
-                          />
-                          <button 
-                            className="qty-btn qty-plus"
-                            onClick={() => updateQty(idx, (item.qty || 0) + 1)}
-                            disabled={item.qty >= (item.maxStock || getProductStock(item.id))}
-                          >+</button>
-                          {item.id && <span className="qty-stock-hint" style={{ marginLeft: 4 }}>/{item.maxStock || getProductStock(item.id)}</span>}
-                        </div>
-                      ) : (
-                        <span style={{ color: 'var(--text-4)', fontSize: 12 }}>—</span>
-                      )}
+                    <div style={{ textAlign: 'center', fontWeight: 800, color: 'var(--primary)', fontSize: '16px' }}>{item.price ? `₹${item.price}` : "—"}</div>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px', justifyContent: 'center' }}>
+                      <button className="btn-outline" onClick={() => updateQty(idx, (item.qty || 0) - 1)} style={{ width: '36px', height: '36px', padding: 0 }}>-</button>
+                      <input type="number" className="input-premium" style={{ width: '64px', textAlign: 'center', fontWeight: 900, height: '36px' }} value={item.qty || ""} onChange={(e) => updateQty(idx, e.target.value)} onKeyDown={(e) => handleKeyDown(e, idx, "qty")} />
+                      <button className="btn-outline" onClick={() => updateQty(idx, (item.qty || 0) + 1)} style={{ width: '36px', height: '36px', padding: 0 }}>+</button>
                     </div>
-
-                    <div className="pos-cell">
-                      {item.id ? (
-                        <input
-                          type="number"
-                          className="pos-input"
-                          style={{ width: 50, textAlign: "center", fontSize: 12 }}
-                          value={item.discountPercent || ""}
-                          placeholder="0"
-                          min={0}
-                          max={100}
-                          onChange={(e) => updateDiscount(idx, e.target.value)}
-                        />
-                      ) : (
-                        <span style={{ color: 'var(--text-4)', fontSize: 12 }}>—</span>
-                      )}
+                    <div style={{ textAlign: 'right', fontWeight: 950, fontSize: '18px', color: '#fff' }}>
+                      ₹{item.total ? (item.total + (item.gstAmt || 0) - (item.discountAmt || 0)).toFixed(2) : "0.00"}
                     </div>
-
-                    {settings.gstNumber && <div className="pos-cell" style={{ color: "var(--text-4)" }}>{item.id ? `${item.gstRate}%` : "0"}</div>}
-                    {settings.gstNumber && <div className="pos-cell" style={{ color: "var(--text-3)" }}>{item.gstAmt ? item.gstAmt.toFixed(2) : "0.00"}</div>}
-                    <div className="pos-cell" style={{ fontWeight: 800, color: "var(--text-1)" }}>{item.total ? (item.total + item.gstAmt - (item.discountAmt || 0)).toFixed(2) : "0.00"}</div>
+                    <div style={{ textAlign: 'center' }}>
+                       <button onClick={() => removeRow(idx)} style={{ color: 'var(--danger)', background: 'transparent', border: 'none', cursor: 'pointer', padding: '8px' }}><Trash2 size={20} /></button>
+                    </div>
                   </div>
                 ))}
-
-                {/* Free Items List (Tally Mode) */}
-                {freeItems.map((item, idx) => (
-                  <div key={item.tempId} className="pos-row" style={{ 
-                    background: "rgba(16, 185, 129, 0.05)",
-                    gridTemplateColumns: settings.gstNumber ? "50px 1fr 100px 112px 72px 72px 90px 110px" : "50px 1fr 100px 112px 72px 110px"
-                  }}>
-                    <div className="pos-cell" style={{ color: "#10b981", fontSize: 11, fontWeight: "bold" }}>F{idx + 1}</div>
-                    <div className="pos-cell" style={{ textAlign: "left" }}>
-                      <span style={{ fontWeight: 700, color: "var(--text-1)" }}>{item.name}</span>
-                      <span style={{ marginLeft: 8, background: "#10b981", color: "white", padding: "2px 6px", borderRadius: 4, fontSize: 10, fontWeight: 700 }}>FREE</span>
-                      <div style={{ fontSize: 10, color: "var(--text-3)", marginTop: 2 }}>Offer: {item.offerName}</div>
-                    </div>
-                    <div className="pos-cell" style={{ color: "var(--text-3)" }}>₹0.00</div>
-                    <div className="pos-cell" style={{ fontWeight: 700 }}>{item.qty}</div>
-                    <div className="pos-cell" style={{ color: "var(--text-4)" }}>—</div>
-                    {settings.gstNumber && <div className="pos-cell" style={{ color: "var(--text-4)" }}>0%</div>}
-                    {settings.gstNumber && <div className="pos-cell" style={{ color: "var(--text-4)" }}>0.00</div>}
-                    <div className="pos-cell" style={{ fontWeight: 800, color: "#10b981" }}>0.00</div>
-                  </div>
-                ))}
-                
-                {/* Empty spacer for visual balance */}
-                <div style={{ height: 100 }}></div>
               </div>
-
-              {/* Tally Terminal Footer (The Dark Status Bar) */}
-              <div className="pos-footer">
-                 <div style={{ display: "flex", alignItems: "center", gap: 8, marginRight: 20 }}>
-                    <div style={{ width: 8, height: 8, borderRadius: "50%", background: "#10b981", boxShadow: "0 0 8px #10b981" }}></div>
-                    <span style={{ fontSize: 10, fontWeight: 700, color: "#64748b", textTransform: "uppercase" }}>Cloud Secured</span>
-                 </div>
-
-                 <div className="pos-footer-col">
-                    <span className="footer-label">Total Qty</span>
-                    <span className="footer-val">{qtyTotal}</span>
-                 </div>
-
-                 {settings.gstNumber && (
-                   <div className="pos-footer-col">
-                      <span className="footer-label">Taxable Amt</span>
-                      <span className="footer-val">₹{subtotal.toFixed(2)}</span>
-                   </div>
-                 )}
-
-                 {settings.gstNumber && (
-                   <div className="pos-footer-col">
-                      <span className="footer-label">Total GST</span>
-                      <span className="footer-val">₹{taxTotal.toFixed(2)}</span>
-                   </div>
-                 )}
-
-                 <div className="pos-footer-col">
-                    <span className="footer-label">Discount</span>
-                    <span className="footer-val" style={{ color: totalDiscount > 0 ? '#10b981' : undefined }}>-₹{totalDiscount.toFixed(2)}</span>
-                 </div>
-
-                 <div className="pos-footer-col">
-                    <span className="footer-label">Net Payable</span>
-                    <span className="footer-val" style={{ color: "#3b82f6", fontSize: 20 }}>₹{grandTotal}</span>
-                 </div>
-
-                 <div style={{ marginLeft: "auto", display: "flex", gap: 10 }}>
-                    <button onClick={holdBill} className="btn-outline" style={{ background: "white", border: "1.5px solid #f59e0b", color: "#f59e0b", padding: "0 20px", height: 42, borderRadius: 8, fontWeight: 700, display: "flex", alignItems: "center", gap: 6 }}>⏸ Hold</button>
-                    <button onClick={() => setShowHeldBills(true)} className="btn-outline" style={{ position: "relative", background: "#ede9fe", border: "1.5px solid #c4b5fd", color: "#7c3aed", padding: "0 20px", height: 42, borderRadius: 8, fontWeight: 700, display: "flex", alignItems: "center", gap: 6 }}>
-                      ▶ Resume
-                      {heldCount > 0 && <span style={{ position: "absolute", top: "-5px", right: "-5px", background: "#ef4444", color: "white", borderRadius: "50%", padding: "2px 6px", fontSize: "10px" }}>{heldCount}</span>}
-                    </button>
-                    <button onClick={handleGenerateClick} className="btn-invoice" style={{ height: 42, background: "#2563eb", borderRadius: 8 }}>GENERATE BILL</button>
-                 </div>
-              </div>
+              
+              <button onClick={addRow} className="btn-outline" style={{ margin: '24px', padding: '16px', borderStyle: 'dashed', borderColor: 'var(--primary-glow)', color: 'var(--primary)', fontWeight: 900, letterSpacing: '1px' }}>
+                + APPEND OPERATIONAL ROW (F2)
+              </button>
             </div>
           )}
         </div>
 
-        {/* RIGHT PANEL: CART (Only visible in Photo mode) */}
-        {billingMode === 'photo' && (
-          <div style={{ width: "400px", background: "white", borderLeft: "1px solid var(--border)", display: "flex", flexDirection: "column", boxShadow: "-4px 0 15px rgba(0,0,0,0.03)" }}>
-            
-            <div style={{ padding: "20px", display: "flex", justifyContent: "space-between", alignItems: "center", borderBottom: "1px solid var(--border)" }}>
-               <div style={{ fontWeight: "700", fontSize: "16px", color: "var(--text-1)" }}>Current Bill</div>
-               <div style={{ background: "var(--primary-light)", color: "var(--primary)", padding: "4px 10px", borderRadius: "20px", fontSize: "12px", fontWeight: "600" }}>{qtyTotal} Items</div>
-            </div>
-
-            {/* Cart Items List */}
-            <div style={{ flex: 1, overflowY: "auto", padding: "15px", display: "flex", flexDirection: "column", gap: "15px" }}>
-              {billItems.filter(i => i.id).map((item, idx) => {
-                const stock = item.maxStock || getProductStock(item.id);
-                const atMax = item.qty >= stock;
-                return (
-                <div key={item.tempId} style={{ display: "flex", gap: "12px", background: "var(--surface-2)", padding: "10px", borderRadius: "var(--r-md)" }}>
-                  <div style={{ width: "50px", height: "50px", borderRadius: "6px", overflow: "hidden", background: "var(--border)", flexShrink: 0, display: "flex", alignItems: "center", justifyContent: "center" }}>
-                     {item.image ? (
-                        <img src={item.image} alt={item.name} style={{ width: "100%", height: "100%", objectFit: "cover" }} />
-                     ) : (
-                        <span style={{ fontSize: "20px", color: "white" }}>🛍️</span>
-                     )}
-                  </div>
-                  <div style={{ flex: 1, display: "flex", flexDirection: "column", justifyContent: "center" }}>
-                     <div style={{ fontWeight: "600", fontSize: "13.5px", color: "var(--text-1)", lineHeight: "1.2" }}>{item.name}</div>
-                     <div style={{ display: "flex", justifyContent: "space-between", marginTop: "6px", alignItems: "center" }}>
-                        <div style={{ display: "flex", alignItems: "center", gap: "6px" }}>
-                           <span style={{ fontSize: "12px", color: "var(--text-3)" }}>₹{item.price}</span>
-                           <div className="cart-qty-stepper">
-                             <button
-                               className="cart-qty-btn"
-                               onClick={() => updateQty(idx, (item.qty || 0) - 1)}
-                               disabled={!item.qty || item.qty <= 0}
-                             >–</button>
-                             <span className="cart-qty-val">{item.qty}</span>
-                             <button
-                               className="cart-qty-btn"
-                               onClick={() => updateQty(idx, (item.qty || 0) + 1)}
-                               disabled={atMax}
-                               title={atMax ? `Max stock: ${stock}` : ''}
-                             >+</button>
-                           </div>
-                        </div>
-                        <div style={{ fontWeight: "700", fontSize: "13px", color: "var(--text-1)" }}>₹{(item.total + item.gstAmt - (item.discountAmt || 0)).toFixed(2)}</div>
-                     </div>
-                     {atMax && <div style={{ fontSize: "10px", color: "#f59e0b", fontWeight: 600, marginTop: 2 }}>⚠ Max stock ({stock})</div>}
-                  </div>
-                  <button 
-                    onClick={() => removeRow(idx)}
-                    style={{ width: "24px", height: "24px", borderRadius: "50%", background: "#ef444415", color: "#ef4444", border: "none", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", alignSelf: "center", fontSize: "14px" }}
-                  >×</button>
-                </div>
-              );
-              })}
-
-              {/* Free Items List (Photo Mode Cart) */}
-              {freeItems.map(item => (
-                <div key={item.tempId} style={{ display: "flex", gap: "12px", background: "rgba(16, 185, 129, 0.05)", padding: "10px", borderRadius: "var(--r-md)", border: "1px solid rgba(16, 185, 129, 0.2)" }}>
-                  <div style={{ width: "50px", height: "50px", borderRadius: "6px", overflow: "hidden", background: "#10b98120", flexShrink: 0, display: "flex", alignItems: "center", justifyContent: "center" }}>
-                     {item.image ? (
-                        <img src={item.image} alt={item.name} style={{ width: "100%", height: "100%", objectFit: "cover" }} />
-                     ) : (
-                        <span style={{ fontSize: "20px" }}>🎁</span>
-                     )}
-                  </div>
-                  <div style={{ flex: 1, display: "flex", flexDirection: "column", justifyContent: "center" }}>
-                     <div style={{ fontWeight: "600", fontSize: "13.5px", color: "var(--text-1)", lineHeight: "1.2", display: "flex", alignItems: "center", gap: "6px" }}>
-                       {item.name} 
-                       <span style={{ background: "#10b981", color: "white", padding: "2px 6px", borderRadius: "4px", fontSize: "9px", fontWeight: "bold" }}>FREE</span>
-                     </div>
-                     <div style={{ display: "flex", justifyContent: "space-between", marginTop: "6px", alignItems: "center" }}>
-                        <div style={{ fontSize: "11px", color: "var(--text-3)", fontStyle: "italic" }}>Offer: {item.offerName}</div>
-                        <div style={{ fontWeight: "700", fontSize: "13px", color: "#10b981" }}>{item.qty} items</div>
-                     </div>
-                  </div>
-                  <div style={{ width: "24px", display: "flex", alignItems: "center", justifyContent: "center" }}>🔒</div>
-                </div>
-              ))}
-
-              {billItems.filter(i => i.id).length === 0 && freeItems.length === 0 && (
-                <div style={{ textAlign: "center", color: "var(--text-4)", marginTop: "40px", fontSize: "14px" }}>
-                   <div style={{ fontSize: "40px", marginBottom: "10px" }}>🛒</div>
-                   Cart is empty.<br/>Add products from the left.
-                </div>
-              )}
-            </div>
-
-            {/* Cart Footer */}
-            <div style={{ background: "#f8fafc", borderTop: "1px solid var(--border)", padding: "20px" }}>
-               <div style={{ display: "flex", justifyContent: "space-between", marginBottom: "8px", fontSize: "13px", color: "var(--text-3)" }}>
-                 <span>Taxable Amount</span>
-                 <span>₹{subtotal.toFixed(2)}</span>
-               </div>
-               <div style={{ display: "flex", justifyContent: "space-between", marginBottom: "8px", fontSize: "13px", color: "var(--text-3)" }}>
-                 <span>Total GST</span>
-                 <span>₹{taxTotal.toFixed(2)}</span>
-               </div>
-               {totalDiscount > 0 && (
-                 <div style={{ display: "flex", justifyContent: "space-between", marginBottom: "8px", fontSize: "13px", color: "#10b981", fontWeight: 600 }}>
-                   <span>Discount</span>
-                   <span>-₹{totalDiscount.toFixed(2)}</span>
-                 </div>
-               )}
-               <div style={{ display: "flex", justifyContent: "space-between", marginBottom: "20px", fontSize: "18px", fontWeight: "800", color: "var(--text-1)" }}>
-                 <span>Net Payable</span>
-                 <span style={{ color: "var(--primary)" }}>₹{grandTotal}</span>
-               </div>
-
-               <div style={{ display: "flex", gap: "10px" }}>
-                 <button 
-                   onClick={holdBill}
-                   style={{ flex: 1, padding: "12px", background: "white", border: "1.5px solid #f59e0b", color: "#f59e0b", borderRadius: "var(--r-md)", fontWeight: "700", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", gap: "6px" }}
-                 >⏸ Hold</button>
-                 <button 
-                   onClick={() => setShowHeldBills(true)}
-                   style={{ flex: 1, position: "relative", padding: "12px", background: "#ede9fe", border: "1.5px solid #c4b5fd", color: "#7c3aed", borderRadius: "var(--r-md)", fontWeight: "700", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", gap: "6px" }}
-                 >
-                   ▶ Resume
-                   {heldCount > 0 && <span style={{ position: "absolute", top: "-5px", right: "-5px", background: "#ef4444", color: "white", borderRadius: "50%", padding: "2px 6px", fontSize: "10px" }}>{heldCount}</span>}
-                 </button>
-               </div>
-               <button 
-                 onClick={handleGenerateClick}
-                 style={{ width: "100%", marginTop: "15px", padding: "15px", background: "var(--primary)", color: "white", border: "none", borderRadius: "var(--r-md)", fontWeight: "700", fontSize: "16px", cursor: "pointer", boxShadow: "0 4px 12px rgba(0, 82, 204, 0.25)" }}
-               >NEXT ➔</button>
+        {/* ── RIGHT: SUMMARY PANEL ── */}
+        <div style={{ width: '380px', flexShrink: 0, display: 'flex', flexDirection: 'column', gap: '24px' }}>
+          
+          <div className="modern-card" style={{ padding: '24px' }}>
+            <h3 style={{ fontSize: '11px', fontWeight: 900, color: 'var(--text-dim)', textTransform: 'uppercase', letterSpacing: '2px', marginBottom: '16px' }}>Customer Entity</h3>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+              <input className="form-input" placeholder="Customer Name / Mobile..." value={customer.name} onChange={e => setCustomer({...customer, name: e.target.value})} />
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
+                <div style={{ padding: '12px', background: paymentMode === 'Cash' ? 'var(--primary)' : 'rgba(255,255,255,0.03)', borderRadius: '14px', textAlign: 'center', cursor: 'pointer', fontWeight: 800, fontSize: '12px', border: '1px solid var(--glass-border)' }} onClick={() => setPaymentMode('Cash')}>CASH</div>
+                <div style={{ padding: '12px', background: paymentMode === 'UPI' ? 'var(--primary)' : 'rgba(255,255,255,0.03)', borderRadius: '14px', textAlign: 'center', cursor: 'pointer', fontWeight: 800, fontSize: '12px', border: '1px solid var(--glass-border)' }} onClick={() => setPaymentMode('UPI')}>UPI / ONLINE</div>
+              </div>
             </div>
           </div>
-        )}
+
+          <div className="modern-card" style={{ flex: 1, display: 'flex', flexDirection: 'column', background: 'var(--surface)' }}>
+            <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: '16px' }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: '14px', color: 'var(--text-secondary)' }}>
+                <span style={{ fontWeight: 600 }}>Basket Items</span>
+                <span style={{ fontWeight: 800, color: 'white' }}>{qtyTotal}</span>
+              </div>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: '14px', color: 'var(--text-secondary)' }}>
+                <span style={{ fontWeight: 600 }}>Tax Total</span>
+                <span style={{ fontWeight: 800, color: 'white' }}>₹{taxTotal.toFixed(2)}</span>
+              </div>
+              {totalDiscount > 0 && (
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: '14px', color: 'var(--success)' }}>
+                  <span style={{ fontWeight: 600 }}>Campaign Discount</span>
+                  <span style={{ fontWeight: 800 }}>-₹{totalDiscount.toFixed(2)}</span>
+                </div>
+              )}
+              
+              <div style={{ marginTop: 'auto', paddingTop: '20px', borderTop: '1px solid var(--border)', textAlign: 'right' }}>
+                <div style={{ fontSize: '11px', fontWeight: 800, color: 'var(--text-secondary)', textTransform: 'uppercase', marginBottom: '4px' }}>Payable Amount</div>
+                <div style={{ fontSize: '36px', fontWeight: 900, color: 'var(--primary)', letterSpacing: '-1px' }}>₹{grandTotal}</div>
+              </div>
+            </div>
+
+            <div style={{ marginTop: '32px', display: 'flex', gap: '12px' }}>
+              <button onClick={holdBill} className="btn-outline" style={{ flex: 1, height: '56px' }}>HOLD</button>
+              <button onClick={() => setShowHeldBills(true)} className="btn-outline" style={{ flex: 1, height: '56px', position: 'relative' }}>
+                RECALL {heldCount > 0 && <span className="flex-center" style={{ position: 'absolute', top: '-10px', right: '-10px', width: '24px', height: '24px', background: 'var(--danger)', borderRadius: '50%', fontSize: '11px', fontWeight: 900 }}>{heldCount}</span>}
+              </button>
+            </div>
+            
+            <button 
+              onClick={handleGenerateClick} 
+              className="btn-primary" 
+              style={{ width: "100%", marginTop: "16px", padding: "18px", fontSize: "18px", letterSpacing: '1px' }}
+            >
+              PROCEED TO PAY ➔
+            </button>
+          </div>
+        </div>
       </div>
+
     </div>
   );
 };

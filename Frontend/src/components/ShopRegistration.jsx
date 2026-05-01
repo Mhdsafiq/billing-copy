@@ -248,7 +248,7 @@ export default function ShopRegistration({ onRegistered, forcePending = false, s
     return (
       <div style={{
         position: 'fixed', inset: 0, zIndex: 999999,
-        background: 'linear-gradient(135deg, #020617, #0f172a, #020617)',
+        background: '#020617',
         display: 'flex', flexDirection: 'column', alignItems: 'center',
         justifyContent: 'center', color: 'white', textAlign: 'center',
         fontFamily: "'Inter', system-ui, sans-serif", padding: 40,
@@ -273,7 +273,7 @@ export default function ShopRegistration({ onRegistered, forcePending = false, s
           Registration Complete
         </div>
         <h1 style={{ fontSize: 36, fontWeight: 800, marginBottom: 12, letterSpacing: '-0.03em',
-          background: 'linear-gradient(to bottom, #fff, #94a3b8)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>
+          background: '#fff', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>
           Pending Admin Activation
         </h1>
         <p style={{ fontSize: 16, color: '#64748b', maxWidth: 500, lineHeight: 1.7, marginBottom: 40 }}>
@@ -308,7 +308,7 @@ export default function ShopRegistration({ onRegistered, forcePending = false, s
           style={{
             marginBottom: 20,
             padding: '14px 36px',
-            background: checkingActivation ? 'rgba(99,102,241,0.3)' : 'linear-gradient(135deg, #6366f1, #a855f7)',
+            background: checkingActivation ? 'rgba(99,102,241,0.3)' : '#6366f1',
             color: '#fff', border: 'none', borderRadius: 16,
             fontSize: 15, fontWeight: 800, cursor: checkingActivation ? 'wait' : 'pointer',
             boxShadow: '0 8px 24px rgba(99,102,241,0.25)',
@@ -527,8 +527,8 @@ export default function ShopRegistration({ onRegistered, forcePending = false, s
         .gradient-mesh {
           position: absolute; inset: 0; opacity: 0.4;
           background: 
-            radial-gradient(circle at 20% 30%, #6366f1 0%, transparent 40%),
-            radial-gradient(circle at 80% 70%, #a855f7 0%, transparent 40%);
+            #6366f1,
+            #a855f7;
           filter: blur(80px); animation: meshFloat 20s infinite alternate;
         }
         @keyframes meshFloat { 0% { transform: scale(1); } 100% { transform: scale(1.2) rotate(5deg); } }
@@ -589,7 +589,7 @@ export default function ShopRegistration({ onRegistered, forcePending = false, s
         /* Verify Button */
         .verify-btn {
           height: 56px; padding: 0 18px; border-radius: 14px; border: none;
-          background: linear-gradient(135deg, #6366f1, #8b5cf6); color: white;
+          background: #6366f1; color: white;
           font-size: 13px; font-weight: 700; cursor: pointer;
           transition: all 0.3s; white-space: nowrap;
           display: flex; align-items: center; gap: 6px;
@@ -597,7 +597,7 @@ export default function ShopRegistration({ onRegistered, forcePending = false, s
         .verify-btn:hover:not(:disabled) { transform: translateY(-1px); box-shadow: 0 6px 20px rgba(99,102,241,0.4); }
         .verify-btn:disabled { opacity: 0.5; cursor: wait; }
         .verify-btn.confirm {
-          background: linear-gradient(135deg, #22c55e, #16a34a);
+          background: #22c55e;
         }
         .verify-btn.confirm:hover:not(:disabled) { box-shadow: 0 6px 20px rgba(34,197,94,0.4); }
 

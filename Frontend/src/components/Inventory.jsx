@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef } from "react";
+import { Camera, RefreshCw } from "lucide-react";
 import { Html5QrcodeScanner, Html5QrcodeSupportedFormats } from "html5-qrcode";
 
 const Inventory = () => {
@@ -244,269 +245,190 @@ const Inventory = () => {
   }, [isScannerOpen, categories]);
 
   return (
-    <div className="admin-scroll-area">
-      <div className="admin-card">
-        <div className="admin-card-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-          <span>Add New Product details</span>
-          {form.product_type !== 'loose' && (
-            <button type="button" className="btn-primary" style={{ display: 'flex', gap: '8px', alignItems: 'center' }} onClick={() => setIsScannerOpen(true)}>
-              📷 Add Product using Barcode
+    <div className="animate-fade" style={{ padding: '40px', height: '100%', overflowY: 'auto' }}>
+      <div style={{ maxWidth: '1200px', margin: '0 auto' }}>
+        
+        <header style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', marginBottom: '48px', gap: '24px', flexWrap: 'wrap' }}>
+          <div>
+            <h1 className="text-gradient" style={{ margin: 0, fontSize: '42px', fontWeight: 950, letterSpacing: '-0.04em' }}>Inventory Hub</h1>
+            <p style={{ color: 'var(--text-secondary)', fontSize: '16px', marginTop: '6px', fontWeight: 500 }}>Systematic management of product entities & stock levels</p>
+          </div>
+          <div style={{ display: 'flex', gap: '16px' }}>
+             {form.product_type !== 'loose' && (
+              <button 
+                type="button" 
+                className="btn-primary" 
+                style={{ display: 'flex', gap: '12px', alignItems: 'center', padding: '14px 28px', fontSize: '14px' }} 
+                onClick={() => setIsScannerOpen(true)}
+              >
+                <Camera size={20} /> AI SMART SCAN
+              </button>
+            )}
+            <button className="btn-outline" style={{ display: 'flex', gap: '12px', alignItems: 'center', padding: '14px 28px', fontSize: '14px' }} onClick={loadCategories}>
+               <RefreshCw size={18} /> SYNC HUB
             </button>
-          )}
-        </div>
-        <div className="admin-card-body">
-          {isFetchingAPI && <div style={{ color: '#2563eb', marginBottom: '10px', fontWeight: 'bold' }}>Fetching product details...</div>}
-          
-          {isScannerOpen && (
-            <div className="modal-overlay" onClick={() => setIsScannerOpen(false)}>
-              <div className="invoice-modal" onClick={e => e.stopPropagation()} style={{ width: '450px', padding: '30px' }}>
-                <h3 style={{ marginBottom: '20px', display: 'flex', alignItems: 'center', gap: '10px' }}>
-                   📸 Scan Product Barcode
-                </h3>
-                
-                <div id="reader" style={{ width: '100%', borderRadius: '12px', overflow: 'hidden', border: '2px solid var(--border)', background: '#000' }}></div>
-                
-                <div style={{ marginTop: '20px', padding: '15px', background: '#f8fafc', borderRadius: '10px', textAlign: 'center' }}>
-                   <div style={{ fontSize: '12px', color: '#64748b', marginBottom: '8px', fontWeight: 'bold', textTransform: 'uppercase', letterSpacing: '1px' }}>
-                      Scanner Status
-                   </div>
-                   <div style={{ fontSize: '15px', fontWeight: '800', color: scanStatus.includes('✅') ? '#059669' : scanStatus.includes('⚠️') || scanStatus.includes('❌') ? '#ef4444' : '#2563eb' }}>
-                      {scanStatus}
-                   </div>
-                   
-                   {detectedBarcode && (
-                     <div style={{ marginTop: '12px', paddingTop: '12px', borderTop: '1px solid #e2e8f0' }}>
-                        <div style={{ fontSize: '11px', color: '#94a3b8' }}>DETECTED NUMBER</div>
-                        <div style={{ fontSize: '20px', fontWeight: '900', color: '#1e293b', letterSpacing: '2px' }}>{detectedBarcode}</div>
-                     </div>
-                   )}
-                </div>
+          </div>
+        </header>
 
-                <div style={{ marginTop: '20px', fontSize: '11px', color: '#94a3b8', textAlign: 'center', fontStyle: 'italic' }}>
-                   Ensure the barcode is well-lit and fits within the horizontal guide.
-                </div>
-
-                <button type="button" className="btn-outline" style={{ marginTop: '20px', width: '100%', height: '45px', fontWeight: '700' }} onClick={() => setIsScannerOpen(false)}>Cancel Scanning</button>
+        {isFetchingAPI && (
+          <div className="pulse" style={{ background: 'rgba(99,102,241,0.1)', color: 'var(--primary)', padding: '20px', borderRadius: '18px', marginBottom: '32px', textAlign: 'center', fontWeight: 800, border: '1px solid var(--primary-glow)', letterSpacing: '1px' }}>
+            ✨ ANALYZING GLOBAL PRODUCT DATABASE...
+          </div>
+        )}
+        
+        {isScannerOpen && (
+          <div className="modal-overlay" onClick={() => setIsScannerOpen(false)}>
+            <div className="invoice-modal animate-up" onClick={e => e.stopPropagation()} style={{ width: '550px' }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '32px' }}>
+                <h3 className="text-gradient" style={{ margin: 0, fontSize: '24px', fontWeight: 900 }}>Vision Scanner</h3>
+                <button onClick={() => setIsScannerOpen(false)} className="btn-outline" style={{ width: '40px', height: '40px', padding: 0, borderRadius: '50%' }}>✕</button>
               </div>
-            </div>
-          )}
-
-          <form onSubmit={addProduct}>
-            
-            {/* Image Upload box */}
-            <div style={{ display: 'flex', gap: '20px', marginBottom: '25px', alignItems: 'flex-start' }}>
-               <div style={{ width: '120px', height: '120px', borderRadius: '8px', border: '2px dashed var(--border)', display: 'flex', alignItems: 'center', justifyContent: 'center', overflow: 'hidden', background: '#f8fafc', position: 'relative' }}>
-                 {form.image ? (
-                   <>
-                     <img src={form.image} alt="Product" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-                     <button 
-                       type="button" 
-                       onClick={() => setForm({ ...form, image: "" })}
-                       style={{ 
-                         position: 'absolute', top: '5px', right: '5px', 
-                         width: '24px', height: '24px', borderRadius: '50%', 
-                         background: '#ef4444', color: 'white', border: 'none', 
-                         fontSize: '12px', fontWeight: 'bold', cursor: 'pointer',
-                         display: 'flex', alignItems: 'center', justifyContent: 'center',
-                         boxShadow: '0 2px 4px rgba(0,0,0,0.2)', zIndex: 10
-                       }}
-                       title="Remove Image"
-                     >
-                       ✕
-                     </button>
-                   </>
-                 ) : (
-                   <div style={{ textAlign: 'center', color: 'var(--text-4)', fontSize: '12px' }}>
-                     📷<br/>No Image
+              
+              <div id="reader" style={{ width: '100%', borderRadius: '24px', overflow: 'hidden', border: '2px solid var(--primary)', background: '#000', boxShadow: '0 0 40px var(--primary-glow)' }}></div>
+              
+              <div className="glass-panel" style={{ marginTop: '32px', padding: '24px', background: 'rgba(0,0,0,0.3)', border: '1px solid var(--glass-border)' }}>
+                 <div style={{ fontSize: '10px', color: 'var(--text-dim)', marginBottom: '12px', fontWeight: 900, textTransform: 'uppercase', letterSpacing: '2px' }}>Neural Processing Status</div>
+                 <div style={{ fontSize: '18px', fontWeight: 800, color: scanStatus.includes('✅') ? 'var(--success)' : 'var(--primary)' }}>{scanStatus}</div>
+                 
+                 {detectedBarcode && (
+                   <div style={{ marginTop: '20px', paddingTop: '20px', borderTop: '1px solid var(--glass-border)' }}>
+                      <div style={{ fontSize: '10px', color: 'var(--text-dim)', fontWeight: 900 }}>SKU IDENTIFIED</div>
+                      <div style={{ fontSize: '32px', fontWeight: 950, color: 'var(--text-main)', letterSpacing: '4px' }}>{detectedBarcode}</div>
                    </div>
                  )}
-                 {!form.image && <input type="file" accept="image/*" onChange={handleImageChange} style={{ opacity: 0, position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', cursor: 'pointer' }} />}
-               </div>
-               <div style={{ flex: 1, display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '25px' }}>
-                  <div className="form-group" style={{ gridColumn: '1 / -1' }}>
-                     <label className="form-label">Product Name</label>
-                     <input className="form-input" name="name" value={form.name} onChange={handleChange} placeholder="Enter Product Name" required autoFocus />
-                  </div>
-                  {/* Product Type Selector — Clean style */}
-                  <div className="form-group" style={{ gridColumn: '1 / -1' }}>
-                     <label className="form-label">Product Type</label>
-                     <div style={{ display: 'flex', gap: '10px' }}>
-                       <button type="button" onClick={() => setForm(prev => ({ ...prev, product_type: 'packaged', unit: 'Pcs' }))} style={{ flex: 1, padding: '12px 16px', borderRadius: '8px', border: form.product_type === 'packaged' ? '2px solid #6366f1' : '1px solid #e2e8f0', background: form.product_type === 'packaged' ? 'rgba(99,102,241,0.06)' : '#fff', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '10px', transition: 'all 0.2s ease' }}>
-                         <span style={{ fontSize: '20px' }}>📦</span>
-                         <div style={{ textAlign: 'left' }}>
-                           <div style={{ fontWeight: 700, fontSize: '13px', color: form.product_type === 'packaged' ? '#6366f1' : '#334155' }}>Packaged</div>
-                           <div style={{ fontSize: '11px', color: '#94a3b8' }}>Sell by piece / box / unit</div>
-                         </div>
-                       </button>
-                       <button type="button" onClick={() => setForm(prev => ({ ...prev, product_type: 'loose', unit: 'Kg' }))} style={{ flex: 1, padding: '12px 16px', borderRadius: '8px', border: form.product_type === 'loose' ? '2px solid #6366f1' : '1px solid #e2e8f0', background: form.product_type === 'loose' ? 'rgba(99,102,241,0.06)' : '#fff', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '10px', transition: 'all 0.2s ease' }}>
-                         <span style={{ fontSize: '20px' }}>⚖️</span>
-                         <div style={{ textAlign: 'left' }}>
-                           <div style={{ fontWeight: 700, fontSize: '13px', color: form.product_type === 'loose' ? '#6366f1' : '#334155' }}>Loose</div>
-                           <div style={{ fontSize: '11px', color: '#94a3b8' }}>Sell by weight / volume</div>
-                         </div>
-                       </button>
-                     </div>
-                     {form.product_type === 'loose' && (
-                       <div style={{ marginTop: '12px', display: 'flex', flexDirection: 'column', gap: '10px' }}>
-                         <div style={{ padding: '12px 14px', background: '#f8fafc', borderRadius: '8px', border: '1px solid #e2e8f0' }}>
-                           <label className="form-label" style={{ marginBottom: '6px' }}>Weight</label>
-                           <input className="form-input" name="weight" value={form.weight} onChange={handleChange} placeholder="e.g. 1, 500" />
-                         </div>
-                         <div style={{ padding: '12px 14px', background: '#f8fafc', borderRadius: '8px', border: '1px solid #e2e8f0', display: 'flex', alignItems: 'center', gap: '12px' }}>
-                           <div style={{ fontWeight: 600, fontSize: '12px', color: '#475569' }}>Selling Unit:</div>
-                           <div style={{ display: 'flex', gap: '6px' }}>
-                             {['Kg', 'Gram', 'Liter'].map(u => (
-                               <button key={u} type="button" onClick={() => setForm(prev => ({ ...prev, unit: u }))} style={{ padding: '5px 14px', borderRadius: '6px', border: form.unit === u ? '1.5px solid #6366f1' : '1px solid #e2e8f0', background: form.unit === u ? '#6366f1' : '#fff', color: form.unit === u ? '#fff' : '#475569', fontWeight: 600, fontSize: '12px', cursor: 'pointer', transition: 'all 0.15s ease' }}>
-                                 {u}
-                               </button>
-                             ))}
-                           </div>
-                         </div>
-                       </div>
-                     )}
-                  </div>
-                  <div className="form-group" style={{ gridColumn: 'span 2' }}>
-                    <label className="form-label">Category</label>
-                    <div style={{ display: 'flex', gap: '8px' }}>
-                      <select className="form-select" name="category_id" value={form.category_id} onChange={handleChange} style={{ flex: 1, height: '42px' }}>
-                        {categories.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
-                      </select>
-                      <button type="button" onClick={() => setAddingCategory(!addingCategory)} style={{ width: '42px', height: '42px', borderRadius: '8px', border: 'none', background: 'rgba(99,102,241,0.1)', color: '#6366f1', fontSize: '20px', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                        +
-                      </button>
-                    </div>
-                    {addingCategory && (
-                      <div style={{ display: 'flex', gap: '8px', marginTop: '8px', padding: '10px', background: '#f8fafc', borderRadius: '8px', border: '1px solid #e2e8f0' }}>
-                        <input className="form-input" placeholder="New Category Name" value={newCategory} onChange={e => setNewCategory(e.target.value)} style={{ flex: 1, padding: '8px 12px', height: '36px' }} />
-                        <button type="button" onClick={async () => {
-                          if (newCategory.trim() && window.api.addCategory) {
-                             await window.api.addCategory({ name: newCategory.trim() });
-                             await loadCategories();
-                             setNewCategory("");
-                             setAddingCategory(false);
-                          }
-                        }} style={{ padding: '0 16px', borderRadius: '6px', border: 'none', background: '#10b981', color: 'white', fontWeight: 'bold', cursor: 'pointer', height: '36px' }}>Save</button>
+              </div>
+
+              <button className="btn-primary" style={{ marginTop: '32px', width: '100%', height: '56px', background: 'var(--danger)' }} onClick={() => setIsScannerOpen(false)}>TERMINATE VISION</button>
+            </div>
+          </div>
+        )}
+
+        <div className="modern-card" style={{ padding: '48px' }}>
+          <form onSubmit={addProduct}>
+            <div style={{ display: 'grid', gridTemplateColumns: '300px 1fr', gap: '60px', marginBottom: '60px' }}>
+               {/* Left: Product Image */}
+               <div>
+                  <div style={{ width: '100%', aspectRatio: '1', borderRadius: '32px', border: '2px dashed var(--glass-border)', display: 'flex', alignItems: 'center', justifyContent: 'center', overflow: 'hidden', background: 'rgba(0,0,0,0.2)', position: 'relative', transition: '0.3s' }}>
+                    {form.image ? (
+                      <>
+                        <img src={form.image} alt="Product" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                        <button type="button" onClick={() => setForm({ ...form, image: "" })} style={{ position: 'absolute', top: '15px', right: '15px', width: '36px', height: '36px', borderRadius: '50%', background: 'rgba(244, 63, 94, 0.8)', color: 'white', border: 'none', cursor: 'pointer', backdropFilter: 'blur(10px)' }}>✕</button>
+                      </>
+                    ) : (
+                      <div style={{ textAlign: 'center', color: 'var(--text-dim)' }}>
+                        <Camera size={56} style={{ opacity: 0.1, marginBottom: '16px' }} />
+                        <div style={{ fontSize: '14px', fontWeight: 700 }}>Upload Visual Asset</div>
+                        <div style={{ fontSize: '11px', marginTop: '4px', opacity: 0.6 }}>PNG, JPG up to 5MB</div>
                       </div>
                     )}
+                    {!form.image && <input type="file" accept="image/*" onChange={handleImageChange} style={{ opacity: 0, position: 'absolute', inset: 0, cursor: 'pointer' }} />}
                   </div>
-                </div>
+                  <div style={{ marginTop: '24px', padding: '16px', background: 'rgba(99, 102, 241, 0.05)', borderRadius: '16px', border: '1px solid var(--primary-glow)' }}>
+                    <div style={{ fontSize: '11px', fontWeight: 800, color: 'var(--primary)', textTransform: 'uppercase', marginBottom: '4px' }}>AI Tip</div>
+                    <div style={{ fontSize: '12px', color: 'var(--text-secondary)', lineHeight: '1.5' }}>High-resolution images increase visual terminal efficiency by 40%.</div>
+                  </div>
+               </div>
+
+               {/* Right: Core Details */}
+               <div style={{ display: 'flex', flexDirection: 'column', gap: '32px' }}>
+                  <div>
+                    <label className="form-label">Product Nomenclature</label>
+                    <input className="input-premium" style={{ fontSize: '24px', fontWeight: 900, height: '64px' }} name="name" value={form.name} onChange={handleChange} placeholder="Enter official product name..." required />
+                  </div>
+
+                  <div>
+                     <label className="form-label">Operational Classification</label>
+                     <div style={{ display: 'flex', gap: '20px' }}>
+                        <div onClick={() => setForm(prev => ({ ...prev, product_type: 'packaged', unit: 'Pcs' }))} className={`modern-card ${form.product_type === 'packaged' ? 'pulse' : ''}`} style={{ flex: 1, padding: '24px', cursor: 'pointer', border: form.product_type === 'packaged' ? '2px solid var(--primary)' : '1px solid var(--border)', background: form.product_type === 'packaged' ? 'rgba(99, 102, 241, 0.1)' : 'rgba(0,0,0,0.1)' }}>
+                          <div style={{ fontSize: '32px', marginBottom: '12px' }}>📦</div>
+                          <div style={{ fontWeight: 900, fontSize: '16px', color: '#fff' }}>Packaged</div>
+                          <div style={{ fontSize: '12px', color: 'var(--text-dim)', marginTop: '4px' }}>Unit-based inventory</div>
+                        </div>
+                        <div onClick={() => setForm(prev => ({ ...prev, product_type: 'loose', unit: 'Kg' }))} className={`modern-card ${form.product_type === 'loose' ? 'pulse' : ''}`} style={{ flex: 1, padding: '24px', cursor: 'pointer', border: form.product_type === 'loose' ? '2px solid var(--primary)' : '1px solid var(--border)', background: form.product_type === 'loose' ? 'rgba(99, 102, 241, 0.1)' : 'rgba(0,0,0,0.1)' }}>
+                          <div style={{ fontSize: '32px', marginBottom: '12px' }}>⚖️</div>
+                          <div style={{ fontWeight: 900, fontSize: '16px', color: '#fff' }}>Bulk / Loose</div>
+                          <div style={{ fontSize: '12px', color: 'var(--text-dim)', marginTop: '4px' }}>Weight-based inventory</div>
+                        </div>
+                     </div>
+                  </div>
+
+                  <div>
+                     <label className="form-label">Entity Categorization</label>
+                     <div style={{ display: 'flex', gap: '16px' }}>
+                        <select className="input-premium" style={{ flex: 1, height: '56px' }} name="category_id" value={form.category_id} onChange={handleChange}>
+                          {categories.map(c => <option key={c.id} value={c.id} style={{ background: '#020617' }}>{c.name}</option>)}
+                        </select>
+                        <button type="button" onClick={() => setAddingCategory(true)} className="btn-outline" style={{ width: '56px', height: '56px', fontSize: '24px', padding: 0 }}>+</button>
+                     </div>
+                  </div>
+               </div>
             </div>
 
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '25px', marginBottom: '20px' }}>
-              <div className="form-group">
-                <label className="form-label">Short Code / Unique ID</label>
-                <input className="form-input" name="product_code" value={form.product_code} onChange={handleChange} placeholder="e.g. 101" />
+            <div className="grid-3" style={{ gap: '32px', marginBottom: '48px' }}>
+              <div>
+                <label className="form-label">Commercial Price (₹)</label>
+                <input className="input-premium" style={{ fontSize: '28px', fontWeight: 950, color: 'var(--primary)', height: '72px' }} name="price" type="number" step="0.01" value={form.price} onChange={handleChange} required placeholder="0.00" />
+              </div>
+              <div>
+                <label className="form-label">Acquisition Cost (₹)</label>
+                <input className="input-premium" style={{ fontSize: '28px', fontWeight: 950, color: 'var(--success)', height: '72px' }} name="cost_price" type="number" step="0.01" value={form.cost_price} onChange={handleChange} placeholder="0.00" />
+              </div>
+              <div>
+                <label className="form-label">Initial Reserves</label>
+                <input className="input-premium" style={{ fontSize: '28px', fontWeight: 950, height: '72px' }} name="quantity" type="number" step={form.product_type === 'loose' ? '0.01' : '1'} value={form.quantity} onChange={handleChange} required placeholder="0" />
               </div>
             </div>
 
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '25px', marginBottom: '20px' }}>
+            <div className="grid-3" style={{ gap: '32px', marginBottom: '48px' }}>
+              <div>
+                <label className="form-label">System Entity Code</label>
+                <input className="input-premium" name="product_code" value={form.product_code} onChange={handleChange} placeholder="e.g. SKU-101" />
+              </div>
               {settings?.gstNumber && (
-                <div className="form-group">
-                  <label className="form-label">GST Rate (%)</label>
-                  <select className="form-select" name="gst_rate" value={form.gst_rate} onChange={handleChange}>
-                    <option value="0">0% (Nil)</option>
-                    <option value="5">5% (Essential)</option>
-                    <option value="12">12% (Standard)</option>
-                    <option value="18">18% (Premium)</option>
-                    <option value="28">28% (Luxury)</option>
+                <div>
+                  <label className="form-label">Taxation Protocol (GST)</label>
+                  <select className="input-premium" name="gst_rate" value={form.gst_rate} onChange={handleChange}>
+                    <option value="0" style={{ background: '#020617' }}>EXEMPT (0%)</option>
+                    <option value="5" style={{ background: '#020617' }}>ESSENTIAL (5%)</option>
+                    <option value="12" style={{ background: '#020617' }}>STANDARD (12%)</option>
+                    <option value="18" style={{ background: '#020617' }}>PREMIUM (18%)</option>
+                    <option value="28" style={{ background: '#020617' }}>LUXURY (28%)</option>
                   </select>
                 </div>
               )}
-              {form.product_type !== 'loose' && (
-                <div className="form-group">
-                  <label className="form-label">Barcode / SKU</label>
-                  <input className="form-input" name="barcode" value={form.barcode} onChange={handleChange} placeholder="Scan or type..." />
-                </div>
-              )}
-            </div>
-
-            <div style={{ display: 'grid', gridTemplateColumns: form.product_type === 'loose' ? '1fr 1fr' : '1fr 1fr 1fr', gap: '25px', marginBottom: '20px' }}>
-              <div className="form-group">
-                <label className="form-label">Selling Price (₹)</label>
-                <input className="form-input" name="price" type="number" step="0.01" value={form.price} onChange={handleChange} required 
-                  placeholder={form.product_type === 'loose' ? `e.g. 50` : ''}
-                />
-                {settings?.gstNumber && (
-                  <div style={{ display: 'flex', gap: '10px', marginTop: '8px' }}>
-                     <label style={{ fontSize: '11px', display: 'flex', alignItems: 'center', gap: '4px', cursor: 'pointer' }}>
-                        <input type="radio" name="price_type" value="exclusive" checked={form.price_type === 'exclusive'} onChange={handleChange} /> + GST
-                     </label>
-                     <label style={{ fontSize: '11px', display: 'flex', alignItems: 'center', gap: '4px', cursor: 'pointer' }}>
-                        <input type="radio" name="price_type" value="inclusive" checked={form.price_type === 'inclusive'} onChange={handleChange} /> Incl. GST
-                     </label>
-                  </div>
-                )}
-              </div>
-              {form.product_type !== 'loose' && (
-                <div className="form-group">
-                  <label className="form-label">Cost Price (₹)</label>
-                  <input className="form-input" name="cost_price" type="number" step="0.01" value={form.cost_price} onChange={handleChange} placeholder="Purchase cost" />
-                  {(form.price && form.cost_price) && (
-                    <div style={{ display: 'flex', gap: '6px', alignItems: 'center', marginTop: '8px', color: (Number(form.price) - Number(form.cost_price)) >= 0 ? '#059669' : '#ef4444', fontSize: '11px', fontWeight: 800 }}>
-                      💰 Profit: ₹{(Number(form.price) - Number(form.cost_price)).toFixed(2)} 
-                      ({(((Number(form.price) - Number(form.cost_price)) / Number(form.cost_price)) * 100).toFixed(1)}%)
-                    </div>
-                  )}
-                </div>
-              )}
-              <div className="form-group">
-                <label className="form-label">Opening Stock</label>
-                <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
-                  <input className="form-input" name="quantity" type="number" step={form.product_type === 'loose' ? '0.01' : '1'} value={form.quantity} onChange={handleChange} required 
-                    placeholder={form.product_type === 'loose' ? `e.g. 50` : ''}
-                    style={{ flex: 1 }}
-                  />
-                  {form.product_type === 'loose' && (
-                    <div style={{ display: 'flex', gap: '4px' }}>
-                      {['Kg', 'g', 'Liter'].map(u => {
-                        const realUnit = u === 'g' ? 'Gram' : u;
-                        const isActive = form.stock_unit === realUnit;
-                        return (
-                          <button key={u} type="button" onClick={() => setForm(prev => ({ ...prev, stock_unit: realUnit }))} style={{ padding: '6px 12px', borderRadius: '6px', border: isActive ? '1.5px solid #6366f1' : '1px solid #e2e8f0', background: isActive ? '#6366f1' : '#fff', color: isActive ? '#fff' : '#475569', fontWeight: 600, fontSize: '12px', cursor: 'pointer', transition: 'all 0.15s ease' }}>
-                            {u}
-                          </button>
-                        );
-                      })}
-                    </div>
-                  )}
-                </div>
+              <div>
+                <label className="form-label">Expiration Chronology</label>
+                <input className="input-premium" name="expiry_date" type="date" value={form.expiry_date} onChange={handleChange} style={{ colorScheme: 'dark' }} />
               </div>
             </div>
 
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '25px', marginBottom: '20px' }}>
-              {form.product_type !== 'loose' && (
-                <div className="form-group">
-                  <label className="form-label">Unit</label>
-                  <select className="form-select" name="unit" value={form.unit} onChange={handleChange}>
-                    <option value="Pcs">Pcs</option>
-                    <option value="Kg">Kg</option>
-                    <option value="Box">Box</option>
-                    <option value="Ltr">Ltr</option>
-                    <option value="Strip">Strip (Pharma)</option>
-                    <option value="Bottle">Bottle</option>
-                  </select>
-                </div>
-              )}
-              <div className="form-group">
-                <label className="form-label">Default Discount (%)</label>
-                <input className="form-input" name="default_discount" type="number" step="0.5" value={form.default_discount} onChange={handleChange} placeholder="e.g. 5" />
-              </div>
-              {form.product_type !== 'loose' && (
-                <div className="form-group">
-                  <label className="form-label">Expiry Date 🗓️</label>
-                  <input className="form-input" name="expiry_date" type="date" value={form.expiry_date} onChange={handleChange}
-                    style={{ colorScheme: 'light' }}
-                  />
-                </div>
-              )}
-            </div>
-
-            <div style={{ borderTop: '1px solid #e2e8f0', paddingTop: '20px', marginTop: '20px', textAlign: 'right' }}>
-              <button className="btn-action">SAVE PRODUCT</button>
+            <div style={{ display: 'flex', justifyContent: 'flex-end', paddingTop: '48px', borderTop: '1px solid var(--border)' }}>
+               <button className="btn-primary pulse" style={{ padding: '20px 80px', fontSize: '20px', fontWeight: 950, letterSpacing: '2px' }}>REGISTER ENTITY ➔</button>
             </div>
           </form>
         </div>
       </div>
+
+      {addingCategory && (
+        <div className="modal-overlay" onClick={() => setAddingCategory(false)}>
+          <div className="invoice-modal animate-up" onClick={e => e.stopPropagation()} style={{ width: '400px' }}>
+             <h3 className="text-gradient" style={{ marginBottom: '24px', fontSize: '20px', fontWeight: 900 }}>Create Classification</h3>
+             <input className="input-premium" placeholder="Category Name..." value={newCategory} onChange={e => setNewCategory(e.target.value)} autoFocus />
+             <div style={{ display: 'flex', gap: '12px', marginTop: '24px' }}>
+                <button onClick={() => setAddingCategory(false)} className="btn-outline" style={{ flex: 1 }}>Abort</button>
+                <button onClick={async () => {
+                  if (!newCategory.trim()) return;
+                  if (window.api && window.api.addCategory) {
+                    await window.api.addCategory(newCategory);
+                    setNewCategory("");
+                    setAddingCategory(false);
+                    loadCategories();
+                  }
+                }} className="btn-primary" style={{ flex: 2 }}>Commit Category</button>
+             </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
